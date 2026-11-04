@@ -1,0 +1,124 @@
+.barra-lateral {
+  display: flex;
+  flex: 0 0 220px;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 20px 14px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.barra-lateral__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 0 4px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.barra-lateral__icono-marca {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: var(--color-surface);
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.barra-lateral__icono-marca svg {
+  width: 20px;
+  height: 20px;
+}
+
+.barra-lateral__navegacion {
+  margin-top: 30px;
+}
+
+.barra-lateral__etiqueta-seccion {
+  margin: 0 8px 8px;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.barra-lateral__lista-modulos {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.barra-lateral__modulo {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  text-align: left;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.barra-lateral__modulo:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.barra-lateral__modulo:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.barra-lateral__modulo--activo {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  font-weight: 600;
+}
+
+.barra-lateral__icono-modulo {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 640px) {
+  .barra-lateral {
+    flex-basis: 68px;
+    align-items: center;
+    padding: 16px 8px;
+  }
+
+  .barra-lateral__marca {
+    padding: 0;
+  }
+
+  .barra-lateral__nombre-marca,
+  .barra-lateral__etiqueta-seccion,
+  .barra-lateral__modulo span {
+    display: none;
+  }
+
+  .barra-lateral__navegacion {
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .barra-lateral__modulo {
+    justify-content: center;
+    padding: 0;
+  }
+}
