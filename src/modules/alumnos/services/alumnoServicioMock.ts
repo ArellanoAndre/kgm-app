@@ -1,4 +1,4 @@
-﻿import type { Alumno } from '../types/Alumno'
+import type { Alumno } from '../types/Alumno'
 
 export const ALUMNOS_DE_PRUEBA: Alumno[] = [
   {
@@ -53,7 +53,19 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     turno: 'Matutino',
     fechaIngreso: '2021-08-20',
     observaciones: '',
-    tutores: []
+    tutores: [
+      {
+        id: 2,
+        nombre: 'María',
+        apellidoPaterno: 'Ramírez',
+        apellidoMaterno: '',
+        parentesco: 'Madre',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        esPrincipal: true
+      }
+    ]
   },
   {
     id: 3,
@@ -74,7 +86,19 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     turno: 'Vespertino',
     fechaIngreso: '2023-08-20',
     observaciones: '',
-    tutores: []
+    tutores: [
+      {
+        id: 2,
+        nombre: 'María',
+        apellidoPaterno: 'Ramírez',
+        apellidoMaterno: '',
+        parentesco: 'Madre',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        esPrincipal: true
+      }
+    ]
   },
   {
     id: 4,
@@ -95,7 +119,19 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     turno: 'Matutino',
     fechaIngreso: '2023-08-20',
     observaciones: '',
-    tutores: []
+    tutores: [
+      {
+        id: 2,
+        nombre: 'María',
+        apellidoPaterno: 'Ramírez',
+        apellidoMaterno: '',
+        parentesco: 'Madre',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        esPrincipal: true
+      }
+    ]
   },
   {
     id: 5,
@@ -116,6 +152,18 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     turno: 'Matutino',
     fechaIngreso: '2024-08-20',
     observaciones: '',
-    tutores: []
+    tutores: [
+      {
+        id: 2,
+        nombre: 'María',
+        apellidoPaterno: 'Ramírez',
+        apellidoMaterno: '',
+        parentesco: 'Madre',
+        telefono: '',
+        correo: '',
+        direccion: '',
+        esPrincipal: true
+      }
+    ]
   }
 ]
