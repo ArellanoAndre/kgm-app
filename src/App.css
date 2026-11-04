@@ -3,6 +3,13 @@
   min-height: 100vh;
 }
 
+.contenido-aplicacion {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
 .area-prueba {
   flex: 1;
   min-width: 0;
