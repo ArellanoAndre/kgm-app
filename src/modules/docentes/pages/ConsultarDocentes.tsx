@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import FiltrosDocentes from '../components/FiltrosDocentes'
 import TablaDocentes from '../components/TablaDocentes'
+import RegistrarDocente from './RegistrarDocente'
 import { DOCENTES_DE_PRUEBA } from '../services/docenteServicioMock'
-import type { Docente, EstadoDocente } from '../types/Docente'
+import type { DatosRegistroDocente, Docente, EstadoDocente } from '../types/Docente'
 import '../styles/docentes.css'
 
 type PropiedadesConsultarDocentes = {
   busquedaGlobal: string
+  alLimpiarBusquedaGlobal: () => void
 }
 
 type FiltrosAplicados = {
@@ -14,8 +16,12 @@ type FiltrosAplicados = {
   estado: EstadoDocente | 'Todos'
 }
 
-function ConsultarDocentes({ busquedaGlobal }: PropiedadesConsultarDocentes) {
+function ConsultarDocentes({
+  busquedaGlobal,
+  alLimpiarBusquedaGlobal,
+}: PropiedadesConsultarDocentes) {
   const [docentes, setDocentes] = useState(DOCENTES_DE_PRUEBA)
+  const [mostrarRegistro, setMostrarRegistro] = useState(false)
   const [nombreFiltro, setNombreFiltro] = useState('')
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoDocente | 'Todos'>('Todos')
   const [filtrosAplicados, setFiltrosAplicados] = useState<FiltrosAplicados>({
@@ -63,6 +69,40 @@ function ConsultarDocentes({ busquedaGlobal }: PropiedadesConsultarDocentes) {
     setMensaje(accion)
   }
 
+  function registrarDocente(datos: DatosRegistroDocente) {
+    const nuevoDocente: Docente = {
+      id: Math.max(0, ...docentes.map((docente) => docente.id)) + 1,
+      nombre: `${datos.nombre} ${datos.apellidoPaterno} ${datos.apellidoMaterno}`.trim(),
+      curp: datos.curp,
+      correo: datos.correo,
+      estado: datos.estado,
+      asignacion: null,
+      ciclo: 'Ciclo 2026–2027',
+      fechaNacimiento: datos.fechaNacimiento,
+      telefono: datos.telefono,
+      direccion: datos.direccion,
+      foto: datos.foto,
+    }
+
+    setDocentes((docentesActuales) => [...docentesActuales, nuevoDocente])
+    setFiltrosAplicados({ nombre: '', estado: 'Todos' })
+    setNombreFiltro('')
+    setEstadoFiltro('Todos')
+    alLimpiarBusquedaGlobal()
+    setMostrarRegistro(false)
+    setMensaje(`El docente ${nuevoDocente.nombre} se registró correctamente.`)
+  }
+
+  if (mostrarRegistro) {
+    return (
+      <RegistrarDocente
+        alCancelar={() => setMostrarRegistro(false)}
+        alGuardar={registrarDocente}
+        docentesExistentes={docentes}
+      />
+    )
+  }
+
   return (
     <section aria-labelledby="titulo-docentes" className="pagina-docentes">
       <header className="pagina-docentes__encabezado">
@@ -72,7 +112,7 @@ function ConsultarDocentes({ busquedaGlobal }: PropiedadesConsultarDocentes) {
         </div>
         <button
           className="pagina-docentes__nuevo"
-          onClick={() => avisarAccionPendiente('Próximamente...')}
+          onClick={() => setMostrarRegistro(true)}
           type="button"
         >
           <span aria-hidden="true">+</span> Nuevo docente

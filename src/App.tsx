@@ -20,7 +20,10 @@ export function App() {
       valorBusqueda={busqueda}
     >
       {moduloActivo === 'docentes' ? (
-        <ConsultarDocentes busquedaGlobal={busqueda} />
+        <ConsultarDocentes
+          alLimpiarBusquedaGlobal={() => setBusqueda('')}
+          busquedaGlobal={busqueda}
+        />
       ) : (
         <section className="area-prueba" aria-labelledby="modulo-seleccionado">
           <div className="area-prueba__tarjeta">

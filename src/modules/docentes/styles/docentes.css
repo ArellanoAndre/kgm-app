@@ -457,3 +457,372 @@
     line-height: 1.5;
   }
 }
+
+.pagina-registro-docente {
+  max-width: 1500px;
+}
+
+.tarjeta-registro-docente {
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.tarjeta-registro-docente__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tarjeta-registro-docente__encabezado h2,
+.resumen-registro h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.tarjeta-registro-docente__encabezado p,
+.resumen-registro > p {
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tarjeta-registro-docente__obligatorios {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tarjeta-registro-docente__contenido {
+  padding: 20px 22px;
+}
+
+.formulario-docente {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 22px;
+}
+
+.formulario-docente__principal {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+}
+
+.foto-docente {
+  display: flex;
+  min-height: 96px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.foto-docente__vista {
+  display: grid;
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  overflow: hidden;
+  place-items: center;
+  color: var(--color-text-secondary);
+  background: #e5e7eb;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.foto-docente__vista img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foto-docente__descripcion {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.foto-docente__descripcion strong {
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+.foto-docente__boton {
+  display: grid;
+  min-height: 34px;
+  place-items: center;
+  padding: 0 12px;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.foto-docente__boton:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.foto-docente__boton:focus-within,
+.formulario-docente__campo input:focus,
+.formulario-docente__campo select:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary-light);
+}
+
+.formulario-docente__seccion h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.formulario-docente__seccion p {
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
+.formulario-docente__rejilla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.formulario-docente__campo {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 6px;
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.formulario-docente__campo strong {
+  color: var(--color-primary);
+}
+
+.formulario-docente__campo input,
+.formulario-docente__campo select {
+  width: 100%;
+  height: 36px;
+  min-width: 0;
+  padding: 0 10px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.formulario-docente__campo input::placeholder {
+  color: #9ca3af;
+}
+
+.formulario-docente__campo input[aria-invalid='true'],
+.formulario-docente__campo select[aria-invalid='true'] {
+  border-color: #dc2626;
+}
+
+.formulario-docente__campo--completo {
+  grid-column: 1 / -1;
+}
+
+.formulario-docente__error {
+  color: #b91c1c;
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.aviso-docentes--formulario {
+  align-items: flex-start;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.aviso-docentes--formulario svg {
+  margin-top: 1px;
+}
+
+.aviso-docentes--formulario strong {
+  font-weight: 700;
+}
+
+.resumen-registro {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.resumen-registro h2 {
+  font-size: 14px;
+}
+
+.resumen-registro > p {
+  margin-top: -8px;
+  font-size: 11px;
+}
+
+.resumen-registro__bloque {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.resumen-registro__bloque h3 {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.resumen-registro__bloque strong {
+  color: var(--color-text);
+  font-size: 11px;
+}
+
+.resumen-registro__bloque p,
+.resumen-registro__bloque li {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.resumen-registro__bloque ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 15px;
+}
+
+.tarjeta-registro-docente__pie {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 22px;
+  border-top: 1px solid var(--color-border);
+}
+
+.tarjeta-registro-docente__pie > span {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+}
+
+.tarjeta-registro-docente__pie > div {
+  display: flex;
+  gap: 9px;
+}
+
+.boton-secundario-docente {
+  min-height: 36px;
+  padding: 0 13px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.boton-secundario-docente:hover {
+  background: var(--color-background);
+}
+
+.boton-secundario-docente:focus-visible,
+.foto-docente__boton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .formulario-docente {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 700px) {
+  .tarjeta-registro-docente__contenido {
+    padding: 16px;
+  }
+
+  .formulario-docente {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-registro {
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .tarjeta-registro-docente__encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .formulario-docente__rejilla {
+    grid-template-columns: 1fr;
+  }
+
+  .formulario-docente__campo--completo {
+    grid-column: auto;
+  }
+
+  .foto-docente {
+    flex-wrap: wrap;
+  }
+
+  .foto-docente__descripcion {
+    min-width: calc(100% - 96px);
+  }
+
+  .tarjeta-registro-docente__pie {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 16px;
+  }
+
+  .tarjeta-registro-docente__pie > div {
+    width: 100%;
+  }
+
+  .tarjeta-registro-docente__pie button {
+    flex: 1;
+  }
+}
