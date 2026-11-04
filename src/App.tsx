@@ -1,35 +1,28 @@
 import { useState } from 'react'
-import BarraLateral from './components/layout/BarraLateral'
-import BarraSuperior from './components/layout/BarraSuperior'
+import DashboardLayout from './components/layout/DashboardLayout'
+//import { GestionAcademica } from './modules/gestion-academica/pages/GestionAcademica' Me falta meterlo aun
 import type { ModuloId } from './components/layout/modulosBarraLateral'
-import './App.css'
 
-function App() {
-  const [moduloActivo, setModuloActivo] = useState<ModuloId>('docentes')
-  const [textoBusqueda, setTextoBusqueda] = useState('')
+export function App() {
+  const [moduloActivo, setModuloActivo] = useState<ModuloId>('gestion-academica')
+  const [busqueda, setBusqueda] = useState('')
 
   return (
-    <div className="aplicacion">
-      <BarraLateral moduloActivo={moduloActivo} alCambiarModulo={setModuloActivo} />
-      <div className="contenido-aplicacion">
-        <BarraSuperior
-          alCambiarBusqueda={setTextoBusqueda}
-          inicialesUsuario="JD"
-          nombreUsuario="Juan Docente"
-          notificacionesPendientes={3}
-          valorBusqueda={textoBusqueda}
-        />
-        <main className="area-prueba">
-          <section className="area-prueba__tarjeta">
-            <p className="area-prueba__etiqueta">Texto de ejemplo aca bien machin</p>
-            <h1>BBC</h1>
-            <p>
-              No pos aca nomas vamos poniendo todo lo demas en cada pantalla de cada uno xd lol 76532097 :v
-            </p>
-          </section>
-        </main>
-      </div>
-    </div>
+    <DashboardLayout
+      alCambiarBusqueda={setBusqueda}
+      alCambiarModulo={setModuloActivo}
+      inicialesUsuario="JU"
+      moduloActivo={moduloActivo}
+      nombreUsuario="Juan Pérez"
+      notificacionesPendientes={3}
+      valorBusqueda={busqueda}
+    >
+      {moduloActivo === 'gestion-academica' && <div>Módulo de Gestion</div>/*<GestionAcademica />*/}
+      {moduloActivo === 'alumnos' && <div>Módulo de Alumnos</div>}
+      {moduloActivo === 'docentes' && <div>Módulo de Docentes</div>}
+      {moduloActivo === 'reportes' && <div>Módulo de Reportes</div>}
+    </DashboardLayout>
   )
 }
+
 export default App
