@@ -2,6 +2,7 @@ import { useState } from 'react'
 import BarraLateral from './components/layout/BarraLateral'
 import BarraSuperior from './components/layout/BarraSuperior'
 import type { ModuloId } from './components/layout/modulosBarraLateral'
+import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import './App.css'
 
 function App() {
@@ -19,17 +20,26 @@ function App() {
           notificacionesPendientes={3}
           valorBusqueda={textoBusqueda}
         />
-        <main className="area-prueba">
-          <section className="area-prueba__tarjeta">
-            <p className="area-prueba__etiqueta">Texto de ejemplo aca bien machin</p>
-            <h1>BBC</h1>
-            <p>
-              No pos aca nomas vamos poniendo todo lo demas en cada pantalla de cada uno xd lol 76532097 :v
-            </p>
-          </section>
-        </main>
+        {moduloActivo === 'docentes' ? (
+          <ConsultarDocentes busquedaGlobal={textoBusqueda} />
+        ) : (
+          <main className="area-prueba">
+            <section className="area-prueba__tarjeta">
+              <p className="area-prueba__etiqueta">Módulo seleccionado</p>
+              <h1>
+                {moduloActivo === 'gestion-academica'
+                  ? 'Gestión académica'
+                  : moduloActivo === 'alumnos'
+                    ? 'Alumnos'
+                    : 'Reportes'}
+              </h1>
+              <p>Esta pantalla se implementará en el módulo correspondiente.</p>
+            </section>
+          </main>
+        )}
       </div>
     </div>
   )
 }
+
 export default App

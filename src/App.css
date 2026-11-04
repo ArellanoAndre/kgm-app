@@ -8,6 +8,7 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
+  background: var(--color-background);
 }
 
 .area-prueba {

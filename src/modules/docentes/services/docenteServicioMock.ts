@@ -1,0 +1,58 @@
+import type { Docente } from '../types/Docente'
+
+export const DOCENTES_DE_PRUEBA: Docente[] = [
+  {
+    id: 1,
+    nombre: 'Elena Cruz Sánchez',
+    curp: 'CRSE780101MDFRPN07',
+    correo: 'elena.cruz@escuela.edu.mx',
+    estado: 'Activo',
+    asignacion: '5° A',
+    ciclo: 'Ciclo 2026–2027',
+  },
+  {
+    id: 2,
+    nombre: 'Carlos Martínez Torres',
+    curp: 'MATT850215HDFRPN08',
+    correo: 'carlos.martinez@escuela.edu.mx',
+    estado: 'Activo',
+    asignacion: '5° B',
+    ciclo: 'Ciclo 2026–2027',
+  },
+  {
+    id: 3,
+    nombre: 'Sofía Torres Ramírez',
+    curp: 'TORR820310MDFRPN09',
+    correo: 'sofia.torres@escuela.edu.mx',
+    estado: 'Activo',
+    asignacion: '6° A',
+    ciclo: 'Ciclo 2026–2027',
+  },
+  {
+    id: 4,
+    nombre: 'Miguel Ruiz Gómez',
+    curp: 'RUGM840522HDFRPN10',
+    correo: 'miguel.ruiz@escuela.edu.mx',
+    estado: 'Activo',
+    asignacion: '3° B',
+    ciclo: 'Ciclo 2026–2027',
+  },
+  {
+    id: 5,
+    nombre: 'Laura Hernández López',
+    curp: 'HERL860101MDFRPN11',
+    correo: 'laura.hernandez@escuela.edu.mx',
+    estado: 'Activo',
+    asignacion: '4° A',
+    ciclo: 'Ciclo 2026–2027',
+  },
+  {
+    id: 6,
+    nombre: 'Diego Vega Morales',
+    curp: 'VEMD880205HDFRPN12',
+    correo: 'diego.vega@escuela.edu.mx',
+    estado: 'Inactivo',
+    asignacion: null,
+    ciclo: 'Ciclo 2026–2027',
+  },
+]
