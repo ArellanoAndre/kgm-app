@@ -64,10 +64,10 @@ function ConsultarDocentes({ busquedaGlobal }: PropiedadesConsultarDocentes) {
   }
 
   return (
-    <main className="pagina-docentes">
+    <section aria-labelledby="titulo-docentes" className="pagina-docentes">
       <header className="pagina-docentes__encabezado">
         <div>
-          <h1>Docentes</h1>
+          <h1 id="titulo-docentes">Docentes</h1>
           <p>Consulta y administración de docentes registrados</p>
         </div>
         <button
@@ -169,7 +169,7 @@ function ConsultarDocentes({ busquedaGlobal }: PropiedadesConsultarDocentes) {
           </section>
         </div>
       )}
-    </main>
+    </section>
   )
 }
 
