@@ -2,10 +2,11 @@ import { useState } from 'react'
 import BarraLateral from './components/layout/BarraLateral'
 import BarraSuperior from './components/layout/BarraSuperior'
 import type { ModuloId } from './components/layout/modulosBarraLateral'
+import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
 import './App.css'
 
 function App() {
-  const [moduloActivo, setModuloActivo] = useState<ModuloId>('docentes')
+  const [moduloActivo, setModuloActivo] = useState<ModuloId>('alumnos')
   const [textoBusqueda, setTextoBusqueda] = useState('')
 
   return (
@@ -19,17 +20,10 @@ function App() {
           notificacionesPendientes={3}
           valorBusqueda={textoBusqueda}
         />
-        <main className="area-prueba">
-          <section className="area-prueba__tarjeta">
-            <p className="area-prueba__etiqueta">Texto de ejemplo aca bien machin</p>
-            <h1>BBC</h1>
-            <p>
-              No pos aca nomas vamos poniendo todo lo demas en cada pantalla de cada uno xd lol 76532097 :v
-            </p>
-          </section>
-        </main>
+        <EditarAlumno />
       </div>
     </div>
   )
 }
+
 export default App
