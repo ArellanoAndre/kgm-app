@@ -1,67 +1,146 @@
-import type { Alumno, AlumnoEditable } from '../types/Alumno'
+import type { Alumno, AlumnoEditable, EstadoAlumno } from '../types/Alumno'
 
-const MOCK_ALUMNO: Alumno = {
-  id: 1,
-  nombres: 'Ana',
-  apellidoPaterno: 'García',
-  apellidoMaterno: 'López',
-  curp: 'GALA160101MDFRPN07',
-  fechaNacimiento: '2016-01-01',
-  genero: 'Femenino',
-  nacionalidad: 'Mexicana',
-  telefono: '55 1234 5678',
-  correo: 'ana.garcia@alumno.escuela.edu.mx',
-  direccion: 'Calle de las Flores 18, Col. Centro, C.P. 64000',
-  grado: '5° de primaria',
-  grupo: 'A',
-  cicloEscolar: '2026–2027',
-  estado: 'Activo',
-  turno: 'Matutino',
-  fechaIngreso: '2022-08-08',
-  observaciones: 'Alumna regular, participativa y con buen desempeño académico.',
-  tutor: {
-    nombre: 'Juan García',
-    parentesco: 'Padre',
-    telefono: '55 9876 5432',
-    correo: 'juan.garcia@correo.com',
-    domicilio: 'Calle de las Flores 18, Col. Centro, C.P. 64000',
-    observaciones: 'Contacto principal para asistencias, reportes y reuniones académicas.',
-  },
-  documentos: [
-    { tipo: 'Acta de nacimiento', nombreArchivo: 'acta_nacimiento.pdf' },
-    { tipo: 'Comprobante de domicilio', nombreArchivo: 'comprobante_domicilio.pdf' },
-    { tipo: 'Carta compromiso', nombreArchivo: 'carta_compromiso.pdf' },
-    { tipo: 'Certificado médico', nombreArchivo: 'certificado_medico.pdf' },
-    { tipo: 'Documento de identidad', nombreArchivo: 'ine_tutor.pdf' },
-    { tipo: 'Estado de cuenta', nombreArchivo: 'estado_cuenta.pdf' },
-  ],
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:3000'
+
+interface ApiDatosEscolares {
+  alumnoGrupoId: number
+  grado: string
+  gradoId: number
+  grupo: string
+  grupoId: number
+  cicloEscolar: string
+  cicloId: number
+  activo: boolean
+  turno: string | null
+  fechaIngreso: string | null
+  observaciones: string | null
 }
 
-let alumnoActual = structuredClone(MOCK_ALUMNO)
+interface ApiTutor {
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
+  parentesco: string
+  correo: string | null
+  telefono: string | null
+  direccion: string | null
+}
 
-const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
+interface ApiExpediente {
+  rutaArchivoPdf?: string | null
+}
+
+interface ApiAlumno {
+  id: number
+  curp: string
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string
+  fechaNacimiento: string
+  nacionalidad: string | null
+  genero: string | null
+  direccion: string | null
+  telefono: string | null
+  correo: string | null
+  datosEscolares: ApiDatosEscolares | null
+  tutorPrincipal: ApiTutor | null
+  expedienteAcademico: ApiExpediente | null
+}
+
+function fechaParaInput(value: string | null | undefined): string {
+  return value ? value.slice(0, 10) : ''
+}
+
+function nombreArchivo(ruta: string): string {
+  return ruta.split(/[\\/]/).pop() || ruta
+}
+
+function mapearAlumno(api: ApiAlumno): Alumno {
+  const tutor = api.tutorPrincipal
+  const datosEscolares = api.datosEscolares
+  const estado: EstadoAlumno = datosEscolares?.activo === false ? 'Baja' : 'Activo'
+  const rutaExpediente = api.expedienteAcademico?.rutaArchivoPdf
+
+  return {
+    id: api.id,
+    nombres: api.nombre ?? '',
+    apellidoPaterno: api.apellidoPaterno ?? '',
+    apellidoMaterno: api.apellidoMaterno ?? '',
+    curp: api.curp ?? '',
+    fechaNacimiento: fechaParaInput(api.fechaNacimiento),
+    genero: api.genero ?? '',
+    nacionalidad: api.nacionalidad ?? '',
+    telefono: api.telefono ?? '',
+    correo: api.correo ?? '',
+    direccion: api.direccion ?? '',
+    grado: datosEscolares?.grado ?? 'Sin asignar',
+    grupo: datosEscolares?.grupo ?? 'Sin asignar',
+    cicloEscolar: datosEscolares?.cicloEscolar ?? 'Sin asignar',
+    estado,
+    turno: datosEscolares?.turno ?? '',
+    fechaIngreso: fechaParaInput(datosEscolares?.fechaIngreso),
+    observaciones: datosEscolares?.observaciones ?? '',
+    tutor: {
+      nombre: tutor
+        ? [tutor.nombre, tutor.apellidoPaterno, tutor.apellidoMaterno].filter(Boolean).join(' ')
+        : 'Sin tutor registrado',
+      parentesco: tutor?.parentesco ?? '',
+      telefono: tutor?.telefono ?? '',
+      correo: tutor?.correo ?? '',
+      domicilio: tutor?.direccion ?? '',
+      observaciones: '',
+    },
+    documentos: rutaExpediente
+      ? [{ tipo: 'Expediente académico', nombreArchivo: nombreArchivo(rutaExpediente) }]
+      : [],
+  }
+}
+
+async function procesarRespuesta(response: Response): Promise<Alumno> {
+  if (!response.ok) {
+    let detalle = `Error HTTP ${response.status}`
+    try {
+      const body = (await response.json()) as { message?: string }
+      detalle = body.message ?? detalle
+    } catch {
+      // La API puede responder sin JSON en errores inesperados.
+    }
+    throw new Error(detalle)
+  }
+
+  const data = (await response.json()) as ApiAlumno
+  return mapearAlumno(data)
+}
 
 export async function obtenerAlumnoPorId(id: number): Promise<Alumno> {
-  await delay()
-  if (id !== alumnoActual.id) {
-    throw new Error('Alumno no encontrado')
-  }
-  return structuredClone(alumnoActual)
+  const response = await fetch(`${API_URL}/alumnos/${id}`)
+  return procesarRespuesta(response)
 }
 
 export async function actualizarAlumno(
   id: number,
   cambios: AlumnoEditable,
 ): Promise<Alumno> {
-  await delay(350)
-  if (id !== alumnoActual.id) {
-    throw new Error('Alumno no encontrado')
-  }
+  const response = await fetch(`${API_URL}/alumnos/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      nombre: cambios.nombres,
+      apellidoPaterno: cambios.apellidoPaterno,
+      apellidoMaterno: cambios.apellidoMaterno,
+      fechaNacimiento: cambios.fechaNacimiento || undefined,
+      genero: cambios.genero,
+      nacionalidad: cambios.nacionalidad,
+      telefono: cambios.telefono || undefined,
+      correo: cambios.correo || undefined,
+      direccion: cambios.direccion,
+      turno: cambios.turno || undefined,
+      fechaIngreso: cambios.fechaIngreso || undefined,
+      observaciones: cambios.observaciones,
+    }),
+  })
 
-  alumnoActual = {
-    ...alumnoActual,
-    ...structuredClone(cambios),
-  }
-
-  return structuredClone(alumnoActual)
+  return procesarRespuesta(response)
 }

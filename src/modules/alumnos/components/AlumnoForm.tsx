@@ -27,13 +27,6 @@ export function AlumnoForm({
     onChange({ ...alumno, [key]: value })
   }
 
-  const updateTutor = (key: keyof Alumno['tutor'], value: string) => {
-    onChange({
-      ...alumno,
-      tutor: { ...alumno.tutor, [key]: value },
-    })
-  }
-
   return (
     <form id="editar-alumno-form" className="alumno-form" onSubmit={onSubmit} noValidate>
       <div className="alumno-grid alumno-grid--two">
@@ -60,10 +53,7 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Apellido materno</span>
-              <input
-                value={alumno.apellidoMaterno}
-                onChange={(e) => update('apellidoMaterno', inputValue(e))}
-              />
+              <input value={alumno.apellidoMaterno} onChange={(e) => update('apellidoMaterno', inputValue(e))} />
             </label>
             <label>
               <span>CURP</span>
@@ -71,11 +61,7 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Fecha de nacimiento</span>
-              <input
-                type="date"
-                value={alumno.fechaNacimiento}
-                onChange={(e) => update('fechaNacimiento', inputValue(e))}
-              />
+              <input type="date" value={alumno.fechaNacimiento} onChange={(e) => update('fechaNacimiento', inputValue(e))} />
             </label>
             <label>
               <span>Género</span>
@@ -88,10 +74,7 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Nacionalidad</span>
-              <select value={alumno.nacionalidad} onChange={(e) => update('nacionalidad', inputValue(e))}>
-                <option>Mexicana</option>
-                <option>Otra</option>
-              </select>
+              <input value={alumno.nacionalidad} onChange={(e) => update('nacionalidad', inputValue(e))} />
             </label>
             <label>
               <span>Teléfono</span>
@@ -102,7 +85,6 @@ export function AlumnoForm({
               <input
                 type="email"
                 value={alumno.correo}
-                title={alumno.correo}
                 onChange={(e) => update('correo', inputValue(e))}
                 aria-invalid={Boolean(errors.correo)}
               />
@@ -137,33 +119,27 @@ export function AlumnoForm({
             <label>
               <span>Turno</span>
               <select value={alumno.turno} onChange={(e) => update('turno', inputValue(e))}>
+                <option value="">Sin definir</option>
                 <option>Matutino</option>
                 <option>Vespertino</option>
+                <option>Nocturno</option>
               </select>
             </label>
             <label>
               <span>Fecha de ingreso</span>
-              <input
-                type="date"
-                value={alumno.fechaIngreso}
-                onChange={(e) => update('fechaIngreso', inputValue(e))}
-              />
+              <input type="date" value={alumno.fechaIngreso} onChange={(e) => update('fechaIngreso', inputValue(e))} />
             </label>
             <label>
               <span>Tutor principal</span>
-              <input value={alumno.tutor.nombre} disabled title="Se gestiona en Padres / Tutores" />
+              <input value={alumno.tutor.nombre} disabled title="Se gestiona desde Padres / Tutores" />
             </label>
             <label>
               <span>Parentesco</span>
-              <input value={alumno.tutor.parentesco} disabled title="Se gestiona en Padres / Tutores" />
+              <input value={alumno.tutor.parentesco} disabled title="Se gestiona desde Padres / Tutores" />
             </label>
             <label className="form-span-4">
               <span>Observaciones</span>
-              <textarea
-                rows={2}
-                value={alumno.observaciones}
-                onChange={(e) => update('observaciones', inputValue(e))}
-              />
+              <textarea rows={2} value={alumno.observaciones} onChange={(e) => update('observaciones', inputValue(e))} />
             </label>
           </div>
         </section>
@@ -173,50 +149,43 @@ export function AlumnoForm({
           <div className="form-grid form-grid--four">
             <label>
               <span>Nombre</span>
-              <input value={alumno.tutor.nombre} onChange={(e) => updateTutor('nombre', inputValue(e))} />
+              <input value={alumno.tutor.nombre} disabled title="La edición de tutores se gestiona por separado" />
             </label>
             <label>
               <span>Parentesco</span>
-              <input value={alumno.tutor.parentesco} onChange={(e) => updateTutor('parentesco', inputValue(e))} />
+              <input value={alumno.tutor.parentesco} disabled title="La edición de tutores se gestiona por separado" />
             </label>
             <label>
               <span>Teléfono</span>
-              <input value={alumno.tutor.telefono} onChange={(e) => updateTutor('telefono', inputValue(e))} />
+              <input value={alumno.tutor.telefono} disabled title="La edición de tutores se gestiona por separado" />
             </label>
             <label>
               <span>Correo electrónico</span>
-              <input
-                type="email"
-                value={alumno.tutor.correo}
-                title={alumno.tutor.correo}
-                onChange={(e) => updateTutor('correo', inputValue(e))}
-                aria-invalid={Boolean(errors.tutorCorreo)}
-              />
-              {errors.tutorCorreo && <small className="field-error">{errors.tutorCorreo}</small>}
+              <input value={alumno.tutor.correo} disabled title="La edición de tutores se gestiona por separado" />
             </label>
             <label className="form-span-4">
               <span>Domicilio</span>
-              <input value={alumno.tutor.domicilio} onChange={(e) => updateTutor('domicilio', inputValue(e))} />
-            </label>
-            <label className="form-span-4">
-              <span>Observaciones</span>
-              <input value={alumno.tutor.observaciones} onChange={(e) => updateTutor('observaciones', inputValue(e))} />
+              <input value={alumno.tutor.domicilio} disabled title="La edición de tutores se gestiona por separado" />
             </label>
           </div>
         </section>
 
         <section className="alumno-card">
           <h2>Documentos</h2>
-          <div className="document-grid">
-            {alumno.documentos.map((documento) => (
-              <div className="document-item" key={`${documento.tipo}-${documento.nombreArchivo}`}>
-                <span>{documento.tipo}</span>
-                <button type="button" className="file-pill" title="Vista mock; gestión documental pertenece al expediente">
-                  {documento.nombreArchivo}
-                </button>
-              </div>
-            ))}
-          </div>
+          {alumno.documentos.length > 0 ? (
+            <div className="document-grid">
+              {alumno.documentos.map((documento) => (
+                <div className="document-item" key={`${documento.tipo}-${documento.nombreArchivo}`}>
+                  <span>{documento.tipo}</span>
+                  <button type="button" className="file-pill" title="El expediente se gestiona desde su módulo correspondiente">
+                    {documento.nombreArchivo}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="form-caption">No hay documentos registrados para este alumno.</p>
+          )}
         </section>
       </div>
 
