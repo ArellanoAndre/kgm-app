@@ -113,11 +113,7 @@ function AsignarAlumnoGrupo() {
     setGrupo('')
     setMensaje('')
   }
-
-  function enfocarFormulario() {
-    campoCiclo.current?.focus()
-  }
-
+  
   return (
     <section aria-labelledby="titulo-asignar-alumno" className="pagina-asignar-alumno">
       <header className="pagina-asignar-alumno__encabezado">
