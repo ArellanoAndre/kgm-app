@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import DashboardLayout from './components/layout/DashboardLayout'
-// import { GestionAcademica } from './modules/gestion-academica/pages/GestionAcademica'
 import type { ModuloId } from './components/layout/modulosBarraLateral'
+import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import './App.css'
 
@@ -24,6 +24,8 @@ export function App() {
           alLimpiarBusquedaGlobal={() => setBusqueda('')}
           busquedaGlobal={busqueda}
         />
+      ) : moduloActivo === 'alumnos' ? (
+        <EditarAlumno />
       ) : (
         <section className="area-prueba" aria-labelledby="modulo-seleccionado">
           <div className="area-prueba__tarjeta">
@@ -31,9 +33,7 @@ export function App() {
             <h1 id="modulo-seleccionado">
               {moduloActivo === 'gestion-academica'
                 ? 'Gestión académica'
-                : moduloActivo === 'alumnos'
-                  ? 'Alumnos'
-                  : 'Reportes'}
+                : 'Reportes'}
             </h1>
             <p>Esta pantalla se implementará en el módulo correspondiente.</p>
           </div>
