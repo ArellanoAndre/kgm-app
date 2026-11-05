@@ -5,6 +5,7 @@ import type {
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
 import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
+import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import './App.css'
 
@@ -38,6 +39,9 @@ export function App() {
         />
       ) : moduloActivo === 'alumnos' ? (
         <EditarAlumno />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'asignar-alumno-grupo' ? (
+        <AsignarAlumnoGrupo />
       ) : moduloActivo === 'gestion-academica' && opcionGestionAcademica ? (
         <section className="area-prueba" aria-labelledby="opcion-gestion-academica">
           <div className="area-prueba__tarjeta">
