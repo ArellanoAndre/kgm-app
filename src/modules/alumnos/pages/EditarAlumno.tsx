@@ -7,7 +7,12 @@ import '../styles/alumnos.css'
 type FormErrors = Partial<Record<string, string>>
 type FeedbackKind = 'success' | 'info' | 'error'
 
+interface EditarAlumnoProps {
+  alumnoId?: number
+}
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 function editableFrom(alumno: Alumno): AlumnoEditable {
   return {
     nombres: alumno.nombres,
@@ -22,7 +27,6 @@ function editableFrom(alumno: Alumno): AlumnoEditable {
     turno: alumno.turno,
     fechaIngreso: alumno.fechaIngreso,
     observaciones: alumno.observaciones,
-    tutor: alumno.tutor,
   }
 }
 
@@ -32,12 +36,11 @@ function validate(alumno: Alumno): FormErrors {
   if (!alumno.nombres.trim()) errors.nombres = 'El nombre es obligatorio.'
   if (!alumno.apellidoPaterno.trim()) errors.apellidoPaterno = 'El apellido paterno es obligatorio.'
   if (alumno.correo && !emailPattern.test(alumno.correo)) errors.correo = 'Ingresa un correo válido.'
-  if (alumno.tutor.correo && !emailPattern.test(alumno.tutor.correo)) errors.tutorCorreo = 'Ingresa un correo válido.'
 
   return errors
 }
 
-export default function EditarAlumno() {
+export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [original, setOriginal] = useState<Alumno | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -48,14 +51,19 @@ export default function EditarAlumno() {
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    obtenerAlumnoPorId(1)
+    setLoading(true)
+    setLoadError(null)
+
+    obtenerAlumnoPorId(alumnoId)
       .then((data) => {
         setAlumno(data)
         setOriginal(structuredClone(data))
       })
-      .catch(() => setLoadError('No fue posible cargar la información del alumno.'))
+      .catch((error: unknown) => {
+        setLoadError(error instanceof Error ? error.message : 'No fue posible cargar la información del alumno.')
+      })
       .finally(() => setLoading(false))
-  }, [])
+  }, [alumnoId])
 
   const fullName = useMemo(() => {
     if (!alumno) return ''
@@ -82,9 +90,9 @@ export default function EditarAlumno() {
       setOriginal(structuredClone(updated))
       setFeedbackKind('success')
       setMessage('Cambios guardados correctamente.')
-    } catch {
+    } catch (error: unknown) {
       setFeedbackKind('error')
-      setMessage('No fue posible guardar los cambios. Intenta nuevamente.')
+      setMessage(error instanceof Error ? error.message : 'No fue posible guardar los cambios.')
     } finally {
       setSaving(false)
     }
@@ -103,22 +111,22 @@ export default function EditarAlumno() {
 
   return (
     <section className="edit-page">
-          <div className="page-heading">
-            <div>
-              <h1>Editar alumno</h1>
-              <p>{fullName} · CURP {alumno.curp}</p>
-            </div>
-            <button
-              className="button button--primary button--top"
-              type="button"
-              onClick={() => (document.getElementById('editar-alumno-form') as HTMLFormElement | null)?.requestSubmit()}
-              disabled={saving}
-            >
-              {saving ? 'Guardando…' : 'Guardar cambios'}
-            </button>
-          </div>
+      <div className="page-heading">
+        <div>
+          <h1>Editar alumno</h1>
+          <p>{fullName} · CURP {alumno.curp}</p>
+        </div>
+        <button
+          className="button button--primary button--top"
+          type="button"
+          onClick={() => (document.getElementById('editar-alumno-form') as HTMLFormElement | null)?.requestSubmit()}
+          disabled={saving}
+        >
+          {saving ? 'Guardando…' : 'Guardar cambios'}
+        </button>
+      </div>
 
-          {message && <div className={`feedback-banner feedback-banner--${feedbackKind}`} role="status">{message}</div>}
+      {message && <div className={`feedback-banner feedback-banner--${feedbackKind}`} role="status">{message}</div>}
 
       <AlumnoForm
         alumno={alumno}

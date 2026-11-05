@@ -51,5 +51,4 @@ export type AlumnoEditable = Pick<
   | 'turno'
   | 'fechaIngreso'
   | 'observaciones'
-  | 'tutor'
 >
