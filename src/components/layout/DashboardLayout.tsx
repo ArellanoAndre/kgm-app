@@ -1,13 +1,18 @@
 import type { ReactNode } from 'react'
 import BarraLateral from './BarraLateral'
 import BarraSuperior from './BarraSuperior'
-import type { ModuloId } from './modulosBarraLateral'
+import type {
+  ModuloId,
+  OpcionGestionAcademicaId,
+} from './modulosBarraLateral'
 import './DashboardLayout.css'
 
 type PropiedadesDashboardLayout = {
   children: ReactNode
   moduloActivo: ModuloId
   alCambiarModulo: (modulo: ModuloId) => void
+  opcionGestionAcademicaActiva: OpcionGestionAcademicaId | null
+  alCambiarOpcionGestionAcademica: (opcion: OpcionGestionAcademicaId) => void
   valorBusqueda: string
   alCambiarBusqueda: (valor: string) => void
   nombreUsuario: string
@@ -22,6 +27,8 @@ export default function DashboardLayout({
   children,
   moduloActivo,
   alCambiarModulo,
+  opcionGestionAcademicaActiva,
+  alCambiarOpcionGestionAcademica,
   valorBusqueda,
   alCambiarBusqueda,
   nombreUsuario,
@@ -34,8 +41,10 @@ export default function DashboardLayout({
   return (
     <div className="dashboard-layout">
       <BarraLateral
+        alCambiarOpcionGestionAcademica={alCambiarOpcionGestionAcademica}
         alCambiarModulo={alCambiarModulo}
         moduloActivo={moduloActivo}
+        opcionGestionAcademicaActiva={opcionGestionAcademicaActiva}
       />
       <div className="dashboard-layout__contenedor-principal">
         <BarraSuperior

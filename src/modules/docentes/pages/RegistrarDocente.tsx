@@ -190,13 +190,6 @@ function RegistrarDocente({
           <h1 id="titulo-registro-docente">Registrar docente</h1>
           <p>Captura la información del nuevo docente</p>
         </div>
-        <button
-          className="pagina-docentes__nuevo"
-          form="formulario-registro-docente"
-          type="submit"
-        >
-          Guardar docente
-        </button>
       </header>
 
       <form

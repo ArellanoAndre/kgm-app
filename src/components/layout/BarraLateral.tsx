@@ -1,9 +1,17 @@
-import { MODULOS_BARRA_LATERAL, type ModuloId } from './modulosBarraLateral'
+import { useState } from 'react'
+import {
+  MODULOS_BARRA_LATERAL,
+  OPCIONES_GESTION_ACADEMICA,
+  type ModuloId,
+  type OpcionGestionAcademicaId,
+} from './modulosBarraLateral'
 import './BarraLateral.css'
 
 type PropiedadesBarraLateral = {
   moduloActivo: ModuloId
   alCambiarModulo: (modulo: ModuloId) => void
+  opcionGestionAcademicaActiva: OpcionGestionAcademicaId | null
+  alCambiarOpcionGestionAcademica: (opcion: OpcionGestionAcademicaId) => void
 }
 
 function IconoModulo({ nombre }: { nombre: (typeof MODULOS_BARRA_LATERAL)[number]['icono'] }) {
@@ -50,9 +58,20 @@ function IconoModulo({ nombre }: { nombre: (typeof MODULOS_BARRA_LATERAL)[number
   )
 }
 
-function BarraLateral({ moduloActivo, alCambiarModulo }: PropiedadesBarraLateral) {
+function BarraLateral({
+  moduloActivo,
+  alCambiarModulo,
+  opcionGestionAcademicaActiva,
+  alCambiarOpcionGestionAcademica,
+}: PropiedadesBarraLateral) {
+  const [gestionAcademicaAbierta, setGestionAcademicaAbierta] = useState(
+    moduloActivo === 'gestion-academica' || opcionGestionAcademicaActiva !== null,
+  )
+
   return (
-    <aside className="barra-lateral">
+    <aside
+      className={`barra-lateral${gestionAcademicaAbierta ? ' barra-lateral--gestion-abierta' : ''}`}
+    >
       <a aria-label="Escuela, inicio" className="barra-lateral__marca" href="/">
         <span aria-hidden="true" className="barra-lateral__icono-marca">
           <svg fill="none" viewBox="0 0 24 24">
@@ -71,20 +90,80 @@ function BarraLateral({ moduloActivo, alCambiarModulo }: PropiedadesBarraLateral
       <nav aria-label="Módulos" className="barra-lateral__navegacion">
         <p className="barra-lateral__etiqueta-seccion">Módulos</p>
         <ul className="barra-lateral__lista-modulos">
-          {MODULOS_BARRA_LATERAL.map((modulo) => (
-            <li key={modulo.id}>
-              <button
-                aria-current={moduloActivo === modulo.id ? 'page' : undefined}
-                className={`barra-lateral__modulo${moduloActivo === modulo.id ? ' barra-lateral__modulo--activo' : ''}`}
-                onClick={() => alCambiarModulo(modulo.id)}
-                title={modulo.nombre}
-                type="button"
-              >
-                <IconoModulo nombre={modulo.icono} />
-                <span>{modulo.nombre}</span>
-              </button>
-            </li>
-          ))}
+          {MODULOS_BARRA_LATERAL.map((modulo) => {
+            const esGestionAcademica = modulo.id === 'gestion-academica'
+
+            return (
+              <li key={modulo.id}>
+                <button
+                  aria-current={
+                    moduloActivo === modulo.id && !opcionGestionAcademicaActiva
+                      ? 'page'
+                      : undefined
+                  }
+                  aria-expanded={
+                    esGestionAcademica ? gestionAcademicaAbierta : undefined
+                  }
+                  className={`barra-lateral__modulo${moduloActivo === modulo.id ? ' barra-lateral__modulo--activo' : ''}`}
+                  onClick={() => {
+                    if (esGestionAcademica) {
+                      alCambiarModulo(modulo.id)
+                      setGestionAcademicaAbierta((abierta) => !abierta)
+                      return
+                    }
+
+                    setGestionAcademicaAbierta(false)
+                    alCambiarModulo(modulo.id)
+                  }}
+                  title={modulo.nombre}
+                  type="button"
+                >
+                  <IconoModulo nombre={modulo.icono} />
+                  <span>{modulo.nombre}</span>
+                  {esGestionAcademica && (
+                    <svg
+                      aria-hidden="true"
+                      className={`barra-lateral__flecha${gestionAcademicaAbierta ? ' barra-lateral__flecha--abierta' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  )}
+                </button>
+                {esGestionAcademica && gestionAcademicaAbierta && (
+                  <ul
+                    aria-label="Opciones de Gestión académica"
+                    className="barra-lateral__lista-opciones"
+                  >
+                    {OPCIONES_GESTION_ACADEMICA.map((opcion) => (
+                      <li key={opcion.id}>
+                        <button
+                          aria-current={
+                            opcionGestionAcademicaActiva === opcion.id
+                              ? 'page'
+                              : undefined
+                          }
+                          className={`barra-lateral__opcion${opcionGestionAcademicaActiva === opcion.id ? ' barra-lateral__opcion--activa' : ''}`}
+                          onClick={() => {
+                            alCambiarModulo('gestion-academica')
+                            alCambiarOpcionGestionAcademica(opcion.id)
+                          }}
+                          type="button"
+                        >
+                          {opcion.nombre}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </nav>
     </aside>

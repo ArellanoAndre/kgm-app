@@ -95,6 +95,57 @@
   height: 16px;
 }
 
+.barra-lateral__flecha {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  transition: transform 120ms ease;
+}
+
+.barra-lateral__flecha--abierta {
+  transform: rotate(90deg);
+}
+
+.barra-lateral__lista-opciones {
+  display: grid;
+  gap: 2px;
+  margin: 3px 0 7px;
+  padding: 0 0 0 27px;
+  list-style: none;
+}
+
+.barra-lateral__opcion {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 9px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.barra-lateral__opcion:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.barra-lateral__opcion:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.barra-lateral__opcion--activa {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .barra-lateral {
     flex-basis: 68px;
@@ -110,6 +161,46 @@
   .barra-lateral__etiqueta-seccion,
   .barra-lateral__modulo span {
     display: none;
+  }
+
+  .barra-lateral__flecha,
+  .barra-lateral__lista-opciones {
+    display: none;
+  }
+
+  .barra-lateral--gestion-abierta {
+    flex-basis: 220px;
+    align-items: stretch;
+    padding: 16px 14px;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__marca {
+    padding: 0 4px;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__nombre-marca,
+  .barra-lateral--gestion-abierta .barra-lateral__etiqueta-seccion,
+  .barra-lateral--gestion-abierta .barra-lateral__modulo span,
+  .barra-lateral--gestion-abierta .barra-lateral__flecha,
+  .barra-lateral--gestion-abierta .barra-lateral__lista-opciones {
+    display: block;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__nombre-marca {
+    display: inline;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__etiqueta-seccion {
+    display: block;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__navegacion {
+    width: 100%;
+  }
+
+  .barra-lateral--gestion-abierta .barra-lateral__modulo {
+    justify-content: flex-start;
+    padding: 0 10px;
   }
 
   .barra-lateral__navegacion {
