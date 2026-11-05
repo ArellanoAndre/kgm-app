@@ -10,6 +10,7 @@ import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
+import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
 
 type VistaReportes = 'inicio' | 'calificaciones'
 
@@ -64,6 +65,9 @@ export function App() {
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'asignar-alumno-grupo' ? (
         <AsignarAlumnoGrupo />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'ciclos-escolares' ? (
+        <GestionCiclosEscolares />
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica ? (
         <section
