@@ -1,26 +1,60 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   guardarAsignacionAlumno,
   obtenerAlumnosAsignables,
-} from '../services/asignacionAlumnoServicioMock'
-import type { AlumnoAsignable, AsignacionAlumno } from '../types/AsignacionAlumno'
+  obtenerOpcionesAsignacion,
+} from '../services/asignacionAlumnoServicio'
+import type {
+  AlumnoAsignable,
+  NuevaAsignacionAlumno,
+  OpcionesAsignacion,
+} from '../types/AsignacionAlumno'
 import '../styles/asignarAlumnoGrupo.css'
 
-const CICLOS_ESCOLARES = ['2026–2027', '2025–2026']
-const GRADOS = ['1°', '2°', '3°', '4°', '5°', '6°']
-const GRUPOS = ['A', 'B', 'C']
-
 function AsignarAlumnoGrupo() {
-  const [alumnos, setAlumnos] = useState(obtenerAlumnosAsignables)
-  const [alumnoSeleccionadoId, setAlumnoSeleccionadoId] = useState<number | null>(1)
+  const [alumnos, setAlumnos] = useState<AlumnoAsignable[]>([])
+  const [opciones, setOpciones] = useState<OpcionesAsignacion>({
+    ciclos: [],
+    grados: [],
+    grupos: [],
+  })
+  const [alumnoSeleccionadoId, setAlumnoSeleccionadoId] = useState<number | null>(null)
   const [busquedaAlumno, setBusquedaAlumno] = useState('')
   const [mostrarResultados, setMostrarResultados] = useState(false)
   const [cicloEscolar, setCicloEscolar] = useState('')
   const [grado, setGrado] = useState('')
   const [grupo, setGrupo] = useState('')
   const [mensaje, setMensaje] = useState('')
+  const [errorCarga, setErrorCarga] = useState('')
+  const [cargando, setCargando] = useState(true)
+  const [guardando, setGuardando] = useState(false)
   const [tipoMensaje, setTipoMensaje] = useState<'aviso' | 'error' | 'exito'>('aviso')
-  const campoCiclo = useRef<HTMLSelectElement>(null)
+
+  useEffect(() => {
+    let cancelado = false
+    Promise.all([obtenerAlumnosAsignables(), obtenerOpcionesAsignacion()])
+      .then(([alumnosApi, opcionesApi]) => {
+        if (cancelado) return
+        setAlumnos(alumnosApi)
+        setOpciones(opcionesApi)
+        setErrorCarga('')
+      })
+      .catch((error: unknown) => {
+        if (cancelado) return
+        setErrorCarga(
+          error instanceof Error
+            ? error.message
+            : 'No se pudieron cargar los datos de asignación.',
+        )
+      })
+      .finally(() => {
+        if (!cancelado) setCargando(false)
+      })
+
+    return () => {
+      cancelado = true
+    }
+  }, [])
 
   const alumnoSeleccionado =
     alumnos.find((alumno) => alumno.id === alumnoSeleccionadoId) ?? null
@@ -42,13 +76,20 @@ function AsignarAlumnoGrupo() {
     ) ?? []
 
   const asignacionRepetida =
-    Boolean(cicloEscolar && grado && grupo) &&
-    asignacionesActuales.some(
-      (asignacion) =>
-        asignacion.cicloEscolar === cicloEscolar &&
-        asignacion.grado === grado &&
-        asignacion.grupo === grupo,
-    )
+    Boolean(cicloEscolar) &&
+    (alumnoSeleccionado?.asignaciones.some(
+      (asignacion) => asignacion.cicloId === Number(cicloEscolar),
+    ) ??
+      false)
+  const asignacionDelCiclo = alumnoSeleccionado?.asignaciones.find(
+    (asignacion) => asignacion.cicloId === Number(cicloEscolar),
+  )
+  const cicloSeleccionado = opciones.ciclos.find(
+    (ciclo) => ciclo.id === Number(cicloEscolar),
+  )
+  const gruposDisponibles = opciones.grupos.filter(
+    (opcionGrupo) => opcionGrupo.gradoId === Number(grado),
+  )
 
   function seleccionarAlumno(alumno: AlumnoAsignable) {
     setAlumnoSeleccionadoId(alumno.id)
@@ -57,7 +98,7 @@ function AsignarAlumnoGrupo() {
     setMensaje('')
   }
 
-  function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
+  async function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
 
     if (!alumnoSeleccionado) {
@@ -72,16 +113,30 @@ function AsignarAlumnoGrupo() {
       return
     }
 
-    const nuevaAsignacion: AsignacionAlumno = {
-      cicloEscolar,
-      grado,
-      grupo,
-      estado: 'Activo',
+    if (asignacionRepetida) {
+      setTipoMensaje('error')
+      setMensaje(
+        `El alumno ya tiene una asignación registrada para ${cicloSeleccionado?.nombre ?? 'este ciclo escolar'}.`,
+      )
+      return
+    }
+
+    const gradoAsignado =
+      opciones.grados.find((opcionGrado) => opcionGrado.id === Number(grado))
+        ?.nombre ?? 'el grado seleccionado'
+    const grupoAsignado =
+      gruposDisponibles.find((opcionGrupo) => opcionGrupo.id === Number(grupo))
+        ?.nombre ?? 'el grupo seleccionado'
+    const nuevaAsignacion: NuevaAsignacionAlumno = {
+      cicloId: Number(cicloEscolar),
+      gradoId: Number(grado),
+      grupoId: Number(grupo),
       observaciones: 'Asignación actual del alumno',
     }
 
+    setGuardando(true)
     try {
-      const alumnoActualizado = guardarAsignacionAlumno(
+      const alumnoActualizado = await guardarAsignacionAlumno(
         alumnoSeleccionado.id,
         nuevaAsignacion,
       )
@@ -92,7 +147,7 @@ function AsignarAlumnoGrupo() {
       )
       setTipoMensaje('exito')
       setMensaje(
-        `${alumnoSeleccionado.nombre} fue asignado a ${grado} ${grupo} en el ciclo ${cicloEscolar}.`,
+        `${alumnoSeleccionado.nombre} fue asignado a ${gradoAsignado} ${grupoAsignado} en el ciclo ${cicloSeleccionado?.nombre}.`,
       )
       setCicloEscolar('')
       setGrado('')
@@ -104,6 +159,8 @@ function AsignarAlumnoGrupo() {
           ? error.message
           : 'No se pudo completar la asignación.',
       )
+    } finally {
+      setGuardando(false)
     }
   }
 
@@ -122,6 +179,13 @@ function AsignarAlumnoGrupo() {
           <p>Relaciona un alumno con su ciclo, grado y grupo</p>
         </div>
       </header>
+
+      {errorCarga && (
+        <div className="aviso-asignacion aviso-asignacion--error" role="alert">
+          <strong>No se pudieron cargar los datos</strong>
+          <span>{errorCarga}</span>
+        </div>
+      )}
 
       <section aria-labelledby="titulo-buscar-alumno" className="tarjeta-asignar-alumno">
         <h2 id="titulo-buscar-alumno">1. Buscar alumno</h2>
@@ -152,7 +216,9 @@ function AsignarAlumnoGrupo() {
 
         {mostrarResultados && busquedaAlumno.trim() && (
           <div aria-label="Resultados de alumnos" className="resultados-alumnos">
-            {alumnosEncontrados.length > 0 ? (
+            {cargando ? (
+              <p>Cargando alumnos...</p>
+            ) : alumnosEncontrados.length > 0 ? (
               alumnosEncontrados.map((alumno) => (
                 <button
                   className="resultados-alumnos__opcion"
@@ -177,8 +243,10 @@ function AsignarAlumnoGrupo() {
               <p>CURP {alumnoSeleccionado.curp}</p>
             </div>
             <div className="alumno-seleccionado__dato">
-              <span>Estado actual</span>
-              <strong className="insignia-asignacion insignia-asignacion--activo">
+              <span>Estado de asignación</span>
+              <strong
+                className={`insignia-asignacion${alumnoSeleccionado.estado === 'Activo' ? ' insignia-asignacion--activo' : ' insignia-asignacion--sin-asignacion'}`}
+              >
                 {alumnoSeleccionado.estado}
               </strong>
             </div>
@@ -212,13 +280,13 @@ function AsignarAlumnoGrupo() {
             <select
               id="ciclo-escolar"
               onChange={(evento) => setCicloEscolar(evento.target.value)}
-              ref={campoCiclo}
+              required
               value={cicloEscolar}
             >
               <option value="">Seleccionar ciclo escolar</option>
-              {CICLOS_ESCOLARES.map((ciclo) => (
-                <option key={ciclo} value={ciclo}>
-                  {ciclo}
+              {opciones.ciclos.map((ciclo) => (
+                <option key={ciclo.id} value={ciclo.id}>
+                  {ciclo.nombre}
                 </option>
               ))}
             </select>
@@ -227,13 +295,17 @@ function AsignarAlumnoGrupo() {
             Grado
             <select
               id="grado"
-              onChange={(evento) => setGrado(evento.target.value)}
+              onChange={(evento) => {
+                setGrado(evento.target.value)
+                setGrupo('')
+              }}
+              required
               value={grado}
             >
               <option value="">Seleccionar grado</option>
-              {GRADOS.map((opcionGrado) => (
-                <option key={opcionGrado} value={opcionGrado}>
-                  {opcionGrado}
+              {opciones.grados.map((opcionGrado) => (
+                <option key={opcionGrado.id} value={opcionGrado.id}>
+                  {opcionGrado.nombre}
                 </option>
               ))}
             </select>
@@ -243,12 +315,14 @@ function AsignarAlumnoGrupo() {
             <select
               id="grupo"
               onChange={(evento) => setGrupo(evento.target.value)}
+              disabled={!grado || cargando || Boolean(errorCarga)}
+              required
               value={grupo}
             >
               <option value="">Seleccionar grupo</option>
-              {GRUPOS.map((opcionGrupo) => (
-                <option key={opcionGrupo} value={opcionGrupo}>
-                  {opcionGrupo}
+              {gruposDisponibles.map((opcionGrupo) => (
+                <option key={opcionGrupo.id} value={opcionGrupo.id}>
+                  {opcionGrupo.nombre}
                 </option>
               ))}
             </select>
@@ -259,9 +333,10 @@ function AsignarAlumnoGrupo() {
           <div className="aviso-asignacion aviso-asignacion--error" role="alert">
             <strong>Validación</strong>
             <span>
-              El alumno {alumnoSeleccionado?.nombre} ya está asignado a {grado}{' '}
-              {grupo} en el ciclo {cicloEscolar}. No puedes asignarlo nuevamente
-              al mismo grupo y ciclo.
+              El alumno {alumnoSeleccionado?.nombre} ya está asignado a{' '}
+              {asignacionDelCiclo?.grado} {asignacionDelCiclo?.grupo} en el ciclo{' '}
+              {asignacionDelCiclo?.cicloEscolar}. Solo puede tener una asignación
+              registrada por ciclo escolar.
             </span>
           </div>
         ) : (
@@ -269,19 +344,26 @@ function AsignarAlumnoGrupo() {
             className={`aviso-asignacion${mensaje && tipoMensaje === 'error' ? ' aviso-asignacion--error' : ''}${mensaje && tipoMensaje === 'exito' ? ' aviso-asignacion--exito' : ''}`}
             role={mensaje ? 'status' : 'note'}
           >
-            <strong>{mensaje ? (tipoMensaje === 'error' ? 'Validación' : 'Confirmación') : 'Validación'}</strong>
+            <strong>
+              {mensaje
+                ? tipoMensaje === 'error'
+                  ? 'Validación'
+                  : 'Confirmación'
+                : 'Validación'}
+            </strong>
             <span>
-              {mensaje ||
-                (asignacionesActuales.length > 0
-                  ? `El alumno ${alumnoSeleccionado?.nombre} ya está asignado a ${asignacionesActuales[0].grado} ${asignacionesActuales[0].grupo} en el ciclo ${asignacionesActuales[0].cicloEscolar}. No puedes asignarlo nuevamente al mismo grupo y ciclo.`
-                  : 'Selecciona un ciclo, grado y grupo para asignar al alumno.')}
+              {mensaje || 'Selecciona un ciclo, grado y grupo para asignar al alumno.'}
             </span>
           </div>
         )}
 
         <div className="formulario-asignacion__acciones">
-          <button className="pagina-asignar-alumno__boton-principal" type="submit">
-            Asignar alumno
+          <button
+            className="pagina-asignar-alumno__boton-principal"
+            disabled={cargando || guardando || Boolean(errorCarga)}
+            type="submit"
+          >
+            {guardando ? 'Guardando...' : 'Asignar alumno'}
           </button>
           <button
             className="pagina-asignar-alumno__boton-secundario"
