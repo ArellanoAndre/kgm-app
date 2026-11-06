@@ -9,6 +9,7 @@ type FeedbackKind = 'success' | 'info' | 'error'
 
 interface EditarAlumnoProps {
   alumnoId?: number
+  onAbrirRegistroTutor?: () => void
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -40,7 +41,7 @@ function validate(alumno: Alumno): FormErrors {
   return errors
 }
 
-export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
+export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: EditarAlumnoProps) {
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [original, setOriginal] = useState<Alumno | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -124,6 +125,11 @@ export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
         >
           {saving ? 'Guardando…' : 'Guardar cambios'}
         </button>
+        {onAbrirRegistroTutor && (
+          <button className="button button--secondary button--top" type="button" onClick={onAbrirRegistroTutor}>
+            Registrar tutor
+          </button>
+        )}
       </div>
 
       {message && <div className={`feedback-banner feedback-banner--${feedbackKind}`} role="status">{message}</div>}

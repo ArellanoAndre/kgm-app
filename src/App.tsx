@@ -5,6 +5,7 @@ import type {
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
 import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
+import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
@@ -22,10 +23,12 @@ export function App() {
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
+  const [registrandoTutor, setRegistrandoTutor] = useState(false)
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
     setOpcionGestionAcademica(null)
+    setRegistrandoTutor(false)
 
     if (modulo === 'reportes') {
       setVistaReportes('inicio')
@@ -50,7 +53,11 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        <EditarAlumno />
+        registrandoTutor ? (
+          <RegistrarTutor onCancel={() => setRegistrandoTutor(false)} />
+        ) : (
+          <EditarAlumno onAbrirRegistroTutor={() => setRegistrandoTutor(true)} />
+        )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones
