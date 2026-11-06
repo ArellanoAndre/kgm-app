@@ -1,4 +1,4 @@
-﻿import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import '../styles/alumnos.css'
 
 type Props = {
@@ -122,23 +122,107 @@ export default function RegistrarAlumno({ alVolver }: Props) {
   if (finalizado) {
     return (
       <section className="pagina-alumnos registro-pagina">
-        <div className="registro-exito">
-          <h1>Registro de prueba completado</h1>
-          <p>
-            Se completó el formulario de {datos.nombre} {datos.apellidoPaterno}.
+        <header className="registro-confirmacion-encabezado">
+          <h1>Alumno registrado</h1>
+          <p>Confirmación del registro exitoso</p>
+        </header>
+
+        <div className="registro-confirmacion-tarjeta">
+          <div className="registro-confirmacion-icono">✓</div>
+
+          <h2>El alumno fue registrado correctamente</h2>
+          <p className="registro-confirmacion-descripcion">
+            Se completó correctamente el formulario de registro.
+            Esta es una demostración del frontend y todavía no
+            se ha guardado información en el servidor.
           </p>
-          <p>
-            Este registro es una demostración del frontend.
-            Todavía no se ha guardado ningún alumno.
-          </p>
-          <button className="boton-primario-alumnos" onClick={alVolver}>
-            Volver a alumnos
-          </button>
+
+          <div className="registro-confirmacion-contenido">
+            <h3>Resumen del alumno registrado</h3>
+
+            <div className="registro-confirmacion-resumen">
+              <div className="registro-confirmacion-dato">
+                <span>NOMBRE</span>
+                <strong>
+                  {datos.nombre} {datos.apellidoPaterno} {datos.apellidoMaterno}
+                </strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>CURP</span>
+                <strong>{datos.curp.toUpperCase()}</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>GRADO</span>
+                <strong>{datos.grado}</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>GRUPO</span>
+                <strong>{datos.grupo}</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>ESTADO</span>
+                <strong className="registro-confirmacion-estado">Activo</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>TURNO</span>
+                <strong>{datos.turno}</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>TUTOR</span>
+                <strong>{datos.tutorNombre}</strong>
+              </div>
+
+              <div className="registro-confirmacion-dato">
+                <span>DOCUMENTOS SELECCIONADOS</span>
+                <strong>
+                  {datos.documentos.length > 0
+                    ? datos.documentos.join(', ')
+                    : 'Ninguno'}
+                </strong>
+              </div>
+            </div>
+
+            <div className="registro-confirmacion-botones">
+              <button
+                type="button"
+                className="boton-primario-alumnos"
+                onClick={alVolver}
+              >
+                Ver ficha del alumno
+              </button>
+
+              <button
+                type="button"
+                className="registro-secundario"
+                onClick={() => {
+                  setDatos(INICIALES)
+                  setPaso(0)
+                  setError('')
+                  setFinalizado(false)
+                }}
+              >
+                Registrar otro alumno
+              </button>
+
+              <button
+                type="button"
+                className="registro-secundario"
+                onClick={alVolver}
+              >
+                Volver al listado
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     )
   }
-
   return (
     <section className="pagina-alumnos registro-pagina">
       <header className="registro-encabezado">
@@ -278,7 +362,21 @@ export default function RegistrarAlumno({ alVolver }: Props) {
             <p><strong>Grado y grupo:</strong> {datos.grado} {datos.grupo}</p>
             <p><strong>Turno:</strong> {datos.turno}</p>
             <p><strong>Tutor:</strong> {datos.tutorNombre} ({datos.tutorParentesco})</p>
-            <p><strong>Documentos marcados:</strong> {datos.documentos.length}</p>
+            <div className="registro-documentos-resumen">
+  <h3>Documentos seleccionados</h3>
+  {datos.documentos.length > 0 ? (
+    <ul>
+      {datos.documentos.map((documento) => (
+        <li key={documento}>
+          <span className="registro-documento-icono">✓</span>
+          {documento}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>No se seleccionaron documentos.</p>
+  )}
+</div>
             <p className="registro-aviso">
               Al confirmar se mostrará una pantalla de éxito de prueba.
               No se enviarán datos al servidor.

@@ -1,3 +1,5 @@
+import EditarAlumno from './EditarAlumno'
+import FichaAlumno from './FichaAlumno'
 import { useMemo, useState } from 'react'
 import FiltrosAlumnos, { type FiltrosAlumno } from '../components/FiltrosAlumnos'
 import TablaAlumnos from '../components/TablaAlumnos'
@@ -18,6 +20,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
   const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES)
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno | null>(null)
   const [mensaje, setMensaje] = useState('')
+  const [alumnoEnEdicion, setAlumnoEnEdicion] = useState<Alumno | null>(null)
 
   const grados = useMemo(
     () => [...new Set(alumnos.map((alumno) => alumno.grado))],
@@ -39,7 +42,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
         alumno.apellidoMaterno,
       ].join(' ').toLowerCase()
 
-      return (
+  return (
         (!busqueda ||
           nombre.includes(busqueda) ||
           alumno.curp.toLowerCase().includes(busqueda)) &&
@@ -65,6 +68,30 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
     )
 
     setMensaje(`Estado de ${alumno.nombre} actualizado a ${nuevoEstado}.`)
+  }
+
+  if (alumnoEnEdicion) {
+    return (
+      <section className="pagina-alumnos">
+        <button
+          type="button"
+          className="boton-primario-alumnos"
+          onClick={() => setAlumnoEnEdicion(null)}
+        >
+          ← Volver al listado
+        </button>
+
+        <EditarAlumno alumnoId={alumnoEnEdicion.id} />
+      </section>
+    )
+  }
+  if (alumnoSeleccionado) {
+    return (
+      <FichaAlumno
+        alumno={alumnoSeleccionado}
+        alVolver={() => setAlumnoSeleccionado(null)}
+      />
+    )
   }
 
   return (
@@ -96,9 +123,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
         <TablaAlumnos
           alumnos={alumnosFiltrados}
           alVer={setAlumnoSeleccionado}
-          alEditar={() =>
-            setMensaje('La edición de alumnos está pendiente de implementación.')
-          }
+          alEditar={setAlumnoEnEdicion}
           alCambiarEstado={cambiarEstado}
         />
       </section>
@@ -117,43 +142,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
         </div>
       )}
 
-      {alumnoSeleccionado && (
-        <div
-          className="dialogo-alumno__fondo"
-          onClick={() => setAlumnoSeleccionado(null)}
-        >
-          <section
-            className="dialogo-alumno"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="titulo-ficha-alumno"
-            onClick={(evento) => evento.stopPropagation()}
-          >
-            <h2 id="titulo-ficha-alumno">Ficha del alumno</h2>
-            <p>
-              <strong>Nombre: </strong>
-              {[
-                alumnoSeleccionado.nombre,
-                alumnoSeleccionado.apellidoPaterno,
-                alumnoSeleccionado.apellidoMaterno,
-              ].join(' ')}
-            </p>
-            <p><strong>CURP: </strong>{alumnoSeleccionado.curp}</p>
-            <p><strong>Grado: </strong>{alumnoSeleccionado.grado}</p>
-            <p><strong>Grupo: </strong>{alumnoSeleccionado.grupo}</p>
-            <p><strong>Estado: </strong>{alumnoSeleccionado.estado}</p>
-            <p><strong>Turno: </strong>{alumnoSeleccionado.turno}</p>
 
-            <button
-              className="boton-primario-alumnos"
-              type="button"
-              onClick={() => setAlumnoSeleccionado(null)}
-            >
-              Cerrar
-            </button>
-          </section>
-        </div>
-      )}
     </section>
   )
 }
