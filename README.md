@@ -1,4 +1,6 @@
-# React + TypeScript + Vite
+# kgm-app
+
+Frontend React + TypeScript + Vite.
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
@@ -30,3 +32,16 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Docker
+
+Este proyecto se levanta junto con `kgm-api` usando el `docker-compose.yml` de ese repositorio:
+
+```bash
+cd ../kgm-api-spring
+docker compose up -d --build
+```
+
+El frontend queda disponible en http://localhost:5173 con recarga en caliente.
+
+La pantalla de Docentes usa `VITE_API_URL` y `VITE_ESCUELA_ID`. Al correr con Docker Compose, el ID se configura con `ESCUELA_ID` en el `.env` del repositorio `kgm-api`; para desarrollo local, copia `.env.example` como `.env` y ajusta los valores.

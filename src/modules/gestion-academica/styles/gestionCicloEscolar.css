@@ -1,0 +1,214 @@
+/* Layout Principal */
+.academico-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+
+}
+
+/* Header de la vista */
+.academico-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.academico-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.academico-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* Tabla & Card */
+.card-table {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+.table-filters {
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.input-search,
+.select-filter {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.input-search {
+  flex: 1;
+}
+
+.input-search:focus,
+.select-filter:focus,
+.form-input:focus,
+.form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.btn-filter {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.academico-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.academico-table th {
+  background-color: #f8fafc;
+  padding: 12px 24px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.academico-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.ciclo-nombre {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ciclo-subtitulo {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Badges de Estado */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-activo {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-cerrado {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.badge-programado {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.action-link {
+  color: #3b82f6;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 12px;
+}
+
+.action-link:hover {
+  text-decoration: underline;
+}
+
+/* Formulario Card */
+.card-form {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 520px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Banner de Validación */
+.validation-banner {
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #1e40af;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 8px;
+}

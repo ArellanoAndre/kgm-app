@@ -1,0 +1,163 @@
+.reportes-inicio {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 28px 44px;
+  color: #111827;
+}
+
+.reportes-inicio__encabezado {
+  margin-bottom: 24px;
+}
+
+.reportes-inicio__etiqueta {
+  margin: 0 0 5px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.reportes-inicio__encabezado h1 {
+  margin: 0 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.reportes-inicio__encabezado > p:last-child {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.reportes-inicio__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.reporte-card {
+  min-height: 156px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #dfe5ee;
+  border-radius: 12px;
+  background: #fff;
+  color: #111827;
+  text-align: left;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+button.reporte-card {
+  width: 100%;
+  font: inherit;
+}
+
+.reporte-card--activo {
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.reporte-card--activo:hover {
+  transform: translateY(-2px);
+  border-color: #93c5fd;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
+}
+
+.reporte-card__icono {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.reporte-card__icono svg {
+  width: 24px;
+  height: 24px;
+}
+
+.reporte-card__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.reporte-card__contenido strong {
+  font-size: 15px;
+}
+
+.reporte-card__contenido small {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.reporte-card--proximo {
+  background: #fafbfc;
+}
+
+.reporte-card--proximo .reporte-card__icono {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.reporte-card__estado {
+  grid-column: 2;
+  justify-self: start;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.reporte-card__estado--disponible {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.reportes-inicio__nota {
+  margin-top: 20px;
+  padding: 15px 17px;
+  border: 1px solid #dbeafe;
+  border-radius: 9px;
+  background: #f8fbff;
+}
+
+.reportes-inicio__nota strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+
+.reportes-inicio__nota p {
+  margin: 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 980px) {
+  .reportes-inicio__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .reportes-inicio {
+    padding: 20px 16px 36px;
+  }
+}

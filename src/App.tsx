@@ -1,121 +1,130 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import DashboardLayout from './components/layout/DashboardLayout'
+import type {
+  ModuloId,
+  OpcionGestionAcademicaId,
+} from './components/layout/modulosBarraLateral'
+import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
+import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
+import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
+import ReportesInicio from './modules/reportes/pages/ReportesInicio'
+import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
+import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
+import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 
-function App() {
-  const [count, setCount] = useState(0)
+type VistaReportes = 'inicio' | 'calificaciones'
+
+export function App() {
+  const [moduloActivo, setModuloActivo] =
+    useState<ModuloId>('gestion-academica')
+  const [opcionGestionAcademica, setOpcionGestionAcademica] =
+    useState<OpcionGestionAcademicaId | null>(null)
+  const [busqueda, setBusqueda] = useState('')
+  const [vistaReportes, setVistaReportes] =
+    useState<VistaReportes>('inicio')
+
+  function cambiarModulo(modulo: ModuloId) {
+    setModuloActivo(modulo)
+    setOpcionGestionAcademica(null)
+
+    if (modulo === 'reportes') {
+      setVistaReportes('inicio')
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <DashboardLayout
+      alCambiarBusqueda={setBusqueda}
+      alCambiarModulo={cambiarModulo}
+      alCambiarOpcionGestionAcademica={setOpcionGestionAcademica}
+      inicialesUsuario="JU"
+      moduloActivo={moduloActivo}
+      nombreUsuario="Juan Pérez"
+      notificacionesPendientes={3}
+      opcionGestionAcademicaActiva={opcionGestionAcademica}
+      valorBusqueda={busqueda}
+    >
+      {moduloActivo === 'docentes' ? (
+        <ConsultarDocentes
+          alLimpiarBusquedaGlobal={() => setBusqueda('')}
+          busquedaGlobal={busqueda}
+        />
+      ) : moduloActivo === 'alumnos' ? (
+        <EditarAlumno />
+      ) : moduloActivo === 'reportes' &&
+        vistaReportes === 'calificaciones' ? (
+        <ReporteCalificaciones
+          alVolver={() => setVistaReportes('inicio')}
+        />
+      ) : moduloActivo === 'reportes' ? (
+        <ReportesInicio
+          alAbrirCalificaciones={() =>
+            setVistaReportes('calificaciones')
+          }
+        />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'asignar-alumno-grupo' ? (
+        <AsignarAlumnoGrupo />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'ciclos-escolares' ? (
+        <GestionCiclosEscolares />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'materias' ? (
+        <GestionMaterias />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica ? (
+        <section
+          className="area-prueba"
+          aria-labelledby="opcion-gestion-academica"
         >
-          Count is {count}
-        </button>
-      </section>
+          <div className="area-prueba__tarjeta">
+            <p className="area-prueba__etiqueta">
+              Gestión académica
+            </p>
 
-      <div className="ticks"></div>
+            <h1 id="opcion-gestion-academica">
+              {{
+                'ciclos-escolares': 'Ciclos escolares',
+                'grados-grupos': 'Grados y grupos',
+                materias: 'Materias',
+                'asignar-alumno-grupo':
+                  'Asignar alumno a grupo',
+                'asignar-docente-grupo-materia':
+                  'Asignar docente a grupo y materia',
+              }[opcionGestionAcademica]}
+            </h1>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            <p>
+              Esta pantalla se implementará en el módulo de
+              Gestión académica.
+            </p>
+          </div>
+        </section>
+      ) : (
+        <section
+          className="area-prueba"
+          aria-labelledby="modulo-seleccionado"
+        >
+          <div className="area-prueba__tarjeta">
+            <p className="area-prueba__etiqueta">
+              Módulo seleccionado
+            </p>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+            <h1 id="modulo-seleccionado">
+              {moduloActivo === 'gestion-academica'
+                ? 'Gestión académica'
+                : 'Módulo seleccionado'}
+            </h1>
+
+            <p>
+              Esta pantalla se implementará en el módulo
+              correspondiente.
+            </p>
+          </div>
+        </section>
+      )}
+    </DashboardLayout>
   )
 }
 
