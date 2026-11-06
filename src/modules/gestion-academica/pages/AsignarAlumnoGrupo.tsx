@@ -129,6 +129,7 @@ function AsignarAlumnoGrupo() {
         ?.nombre ?? 'el grupo seleccionado'
     const nuevaAsignacion: NuevaAsignacionAlumno = {
       cicloId: Number(cicloEscolar),
+      gradoId: Number(grado),
       grupoId: Number(grupo),
       observaciones: 'Asignación actual del alumno',
     }
@@ -279,6 +280,7 @@ function AsignarAlumnoGrupo() {
             <select
               id="ciclo-escolar"
               onChange={(evento) => setCicloEscolar(evento.target.value)}
+              required
               value={cicloEscolar}
             >
               <option value="">Seleccionar ciclo escolar</option>
@@ -297,6 +299,7 @@ function AsignarAlumnoGrupo() {
                 setGrado(evento.target.value)
                 setGrupo('')
               }}
+              required
               value={grado}
             >
               <option value="">Seleccionar grado</option>
@@ -312,6 +315,8 @@ function AsignarAlumnoGrupo() {
             <select
               id="grupo"
               onChange={(evento) => setGrupo(evento.target.value)}
+              disabled={!grado || cargando || Boolean(errorCarga)}
+              required
               value={grupo}
             >
               <option value="">Seleccionar grupo</option>

@@ -27,6 +27,7 @@ export type OpcionesAsignacion = {
 
 export type NuevaAsignacionAlumno = {
   cicloId: number
+  gradoId: number
   grupoId: number
   observaciones?: string
 }
