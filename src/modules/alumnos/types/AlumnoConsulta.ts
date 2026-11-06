@@ -1,4 +1,4 @@
-﻿import type { EstadoAlumno } from './Alumno'
+import type { EstadoAlumno } from './Alumno'
 
 export type GeneroAlumno =
   | 'Femenino'
@@ -34,7 +34,7 @@ export type AlumnoConsulta = {
   grado: string
   grupo: string
   cicloEscolar: string
-  estado: EstadoAlumno
+  estado: EstadoAlumno | 'Sin asignación'
   turno: string
   fechaIngreso: string
   observaciones: string

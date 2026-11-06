@@ -1,9 +1,9 @@
 import EditarAlumno from './EditarAlumno'
 import FichaAlumno from './FichaAlumno'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import FiltrosAlumnos, { type FiltrosAlumno } from '../components/FiltrosAlumnos'
 import TablaAlumnos from '../components/TablaAlumnos'
-import { ALUMNOS_DE_PRUEBA } from '../services/alumnoServicioMock'
+import { consultarAlumnos, consultarFichaAlumno } from '../services/consultaAlumnosApi'
 import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 import '../styles/alumnos.css'
 
@@ -15,20 +15,48 @@ const FILTROS_INICIALES: FiltrosAlumno = {
 }
 
 export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: () => void }) {
-  const [alumnos, setAlumnos] = useState<Alumno[]>(ALUMNOS_DE_PRUEBA)
+  const [alumnos, setAlumnos] = useState<Alumno[]>([])
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)
   const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES)
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState<Alumno | null>(null)
   const [mensaje, setMensaje] = useState('')
   const [alumnoEnEdicion, setAlumnoEnEdicion] = useState<Alumno | null>(null)
 
+  useEffect(() => {
+    let activo = true
+
+    consultarAlumnos()
+      .then((datos) => {
+        if (activo) setAlumnos(datos)
+      })
+      .catch((error) => {
+        if (activo) setMensaje(`No se pudieron cargar los alumnos: ${error.message}`)
+      })
+
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  async function verFicha(alumno: Alumno) {
+    try {
+      const ficha = await consultarFichaAlumno(alumno)
+      setAlumnoSeleccionado(ficha)
+    } catch (error) {
+      setMensaje(
+        error instanceof Error
+          ? `No se pudo consultar la ficha: ${error.message}`
+          : 'No se pudo consultar la ficha.',
+      )
+    }
+  }
   const grados = useMemo(
-    () => [...new Set(alumnos.map((alumno) => alumno.grado))],
+    () => [...new Set(alumnos.map((alumno) => alumno.grado).filter(Boolean))],
     [alumnos],
   )
 
   const grupos = useMemo(
-    () => [...new Set(alumnos.map((alumno) => alumno.grupo))],
+    () => [...new Set(alumnos.map((alumno) => alumno.grupo).filter(Boolean))],
     [alumnos],
   )
 
@@ -56,20 +84,11 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
     })
   }, [alumnos, filtrosAplicados])
 
-  function cambiarEstado(alumno: Alumno) {
-    const nuevoEstado = alumno.estado === 'Activo' ? 'Baja' : 'Activo'
-
-    setAlumnos((actuales) =>
-      actuales.map((actual) =>
-        actual.id === alumno.id
-          ? { ...actual, estado: nuevoEstado }
-          : actual,
-      ),
+  function cambiarEstado(_alumno: Alumno) {
+    setMensaje(
+      'El cambio de estado todavía no está conectado al backend.',
     )
-
-    setMensaje(`Estado de ${alumno.nombre} actualizado a ${nuevoEstado}.`)
   }
-
   if (alumnoEnEdicion) {
     return (
       <section className="pagina-alumnos">
@@ -122,7 +141,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
       <section className="panel-alumnos" aria-label="Listado de alumnos">
         <TablaAlumnos
           alumnos={alumnosFiltrados}
-          alVer={setAlumnoSeleccionado}
+          alVer={verFicha}
           alEditar={setAlumnoEnEdicion}
           alCambiarEstado={cambiarEstado}
         />
@@ -146,4 +165,3 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
     </section>
   )
 }
-

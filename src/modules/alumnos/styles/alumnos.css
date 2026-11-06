@@ -928,3 +928,36 @@
     justify-content: flex-end;
   }
 }
+
+/* AJUSTE FILTROS HU-1.2 */
+.filtros-alumnos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.filtros-alumnos__busqueda {
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+
+.filtros-alumnos__selector {
+  flex: 0 1 170px;
+  min-width: 155px;
+}
+
+.filtros-alumnos__selector select {
+  width: 100%;
+  min-width: 0;
+}
+
+.filtros-alumnos__buscar {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .filtros-alumnos__selector {
+    flex: 1 1 160px;
+  }
+}
