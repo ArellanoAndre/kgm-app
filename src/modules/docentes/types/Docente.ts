@@ -24,5 +24,5 @@ export type DatosRegistroDocente = {
   telefono: string
   correo: string
   direccion: string
-  foto?: string
+  foto?: File
 }

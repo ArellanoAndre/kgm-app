@@ -1,8 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import FiltrosDocentes from '../components/FiltrosDocentes'
 import TablaDocentes from '../components/TablaDocentes'
 import RegistrarDocente from './RegistrarDocente'
-import { DOCENTES_DE_PRUEBA } from '../services/docenteServicioMock'
+import {
+  actualizarEstadoDocente,
+  obtenerDocentes,
+  registrarDocente as guardarDocenteEnApi,
+} from '../services/docenteServicio'
 import type { DatosRegistroDocente, Docente, EstadoDocente } from '../types/Docente'
 import '../styles/docentes.css'
 
@@ -20,7 +24,7 @@ function ConsultarDocentes({
   busquedaGlobal,
   alLimpiarBusquedaGlobal,
 }: PropiedadesConsultarDocentes) {
-  const [docentes, setDocentes] = useState(DOCENTES_DE_PRUEBA)
+  const [docentes, setDocentes] = useState<Docente[]>([])
   const [mostrarRegistro, setMostrarRegistro] = useState(false)
   const [nombreFiltro, setNombreFiltro] = useState('')
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoDocente | 'Todos'>('Todos')
@@ -30,6 +34,30 @@ function ConsultarDocentes({
   })
   const [docenteSeleccionado, setDocenteSeleccionado] = useState<Docente | null>(null)
   const [mensaje, setMensaje] = useState('')
+  const [errorCarga, setErrorCarga] = useState('')
+  const [cargando, setCargando] = useState(true)
+
+  useEffect(() => {
+    let activa = true
+    obtenerDocentes()
+      .then((resultado) => {
+        if (activa) setDocentes(resultado)
+      })
+      .catch((error: unknown) => {
+        if (activa) {
+          setErrorCarga(
+            error instanceof Error ? error.message : 'No se pudieron cargar los docentes.',
+          )
+        }
+      })
+      .finally(() => {
+        if (activa) setCargando(false)
+      })
+
+    return () => {
+      activa = false
+    }
+  }, [])
 
   const docentesFiltrados = useMemo(() => {
     const nombre = filtrosAplicados.nombre.trim().toLocaleLowerCase()
@@ -53,37 +81,31 @@ function ConsultarDocentes({
     setFiltrosAplicados({ nombre: nombreFiltro, estado: estadoFiltro })
   }
 
-  function cambiarEstado(docente: Docente) {
+  async function cambiarEstado(docente: Docente) {
     const nuevoEstado: EstadoDocente =
       docente.estado === 'Activo' ? 'Inactivo' : 'Activo'
 
-    setDocentes((docentesActuales) =>
-      docentesActuales.map((actual) =>
-        actual.id === docente.id ? { ...actual, estado: nuevoEstado } : actual,
-      ),
-    )
-    setMensaje(`${docente.nombre} ahora está ${nuevoEstado.toLowerCase()}.`)
+    try {
+      const actualizado = await actualizarEstadoDocente(docente.id, nuevoEstado)
+      setDocentes((docentesActuales) =>
+        docentesActuales.map((actual) =>
+          actual.id === actualizado.id ? actualizado : actual,
+        ),
+      )
+      setMensaje(`${docente.nombre} ahora está ${nuevoEstado.toLowerCase()}.`)
+    } catch (error) {
+      setErrorCarga(
+        error instanceof Error ? error.message : 'No se pudo cambiar el estado.',
+      )
+    }
   }
 
   function avisarAccionPendiente(accion: string) {
     setMensaje(accion)
   }
 
-  function registrarDocente(datos: DatosRegistroDocente) {
-    const nuevoDocente: Docente = {
-      id: Math.max(0, ...docentes.map((docente) => docente.id)) + 1,
-      nombre: `${datos.nombre} ${datos.apellidoPaterno} ${datos.apellidoMaterno}`.trim(),
-      curp: datos.curp,
-      correo: datos.correo,
-      estado: datos.estado,
-      asignacion: null,
-      ciclo: 'Ciclo 2026–2027',
-      fechaNacimiento: datos.fechaNacimiento,
-      telefono: datos.telefono,
-      direccion: datos.direccion,
-      foto: datos.foto,
-    }
-
+  async function registrarDocente(datos: DatosRegistroDocente) {
+    const nuevoDocente = await guardarDocenteEnApi(datos)
     setDocentes((docentesActuales) => [...docentesActuales, nuevoDocente])
     setFiltrosAplicados({ nombre: '', estado: 'Todos' })
     setNombreFiltro('')
@@ -128,15 +150,25 @@ function ConsultarDocentes({
       />
 
       <section aria-label="Listado de docentes" className="panel-docentes">
-        <TablaDocentes
-          alCambiarEstado={cambiarEstado}
-          alEditar={(docente) =>
-            avisarAccionPendiente(`La edición de ${docente.nombre} se implementará próximamente.`)
-          }
-          alVer={(docente) => setDocenteSeleccionado(docente)}
-          docentes={docentesFiltrados}
-        />
+        {cargando ? (
+          <p role="status">Cargando docentes…</p>
+        ) : (
+          <TablaDocentes
+            alCambiarEstado={cambiarEstado}
+            alEditar={(docente) =>
+              avisarAccionPendiente(`La edición de ${docente.nombre} se implementará próximamente.`)
+            }
+            alVer={(docente) => setDocenteSeleccionado(docente)}
+            docentes={docentesFiltrados}
+          />
+        )}
       </section>
+
+      {errorCarga && (
+        <p className="formulario-docente__error" role="alert">
+          {errorCarga}
+        </p>
+      )}
 
       <aside className="aviso-docentes" role="note">
         <svg
