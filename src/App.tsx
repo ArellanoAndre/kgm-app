@@ -9,6 +9,7 @@ import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
+import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
@@ -26,8 +27,8 @@ export function App() {
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
-
-  const [vistaAlumnos, setVistaAlumnos] = useState<VistaAlumnos>('consulta')
+  const [vistaAlumnos, setVistaAlumnos] =
+    useState<VistaAlumnos>('consulta')
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
@@ -57,17 +58,15 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        <>
-  {vistaAlumnos === 'registro' ? (
-    <RegistrarAlumno
-      alVolver={() => setVistaAlumnos('consulta')}
-    />
-  ) : (
-    <ConsultarAlumnos
-      alNuevoAlumno={() => setVistaAlumnos('registro')}
-    />
-  )}
-</>
+        vistaAlumnos === 'registro' ? (
+          <RegistrarAlumno
+            alVolver={() => setVistaAlumnos('consulta')}
+          />
+        ) : (
+          <ConsultarAlumnos
+            alNuevoAlumno={() => setVistaAlumnos('registro')}
+          />
+        )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones
@@ -85,6 +84,9 @@ export function App() {
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'ciclos-escolares' ? (
         <GestionCiclosEscolares />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'materias' ? (
+        <GestionMaterias />
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica ? (
         <section
