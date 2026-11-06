@@ -9,7 +9,7 @@ type FeedbackKind = 'success' | 'info' | 'error'
 
 interface EditarAlumnoProps {
   alumnoId?: number
-  onAbrirRegistroTutor?: () => void
+  onAbrirRegistroTutor?: (alumnoId: number) => void
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -126,7 +126,11 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
           {saving ? 'Guardando…' : 'Guardar cambios'}
         </button>
         {onAbrirRegistroTutor && (
-          <button className="button button--secondary button--top" type="button" onClick={onAbrirRegistroTutor}>
+          <button
+            className="button button--secondary button--top"
+            type="button"
+            onClick={() => onAbrirRegistroTutor(alumno.id)}
+          >
             Registrar tutor
           </button>
         )}

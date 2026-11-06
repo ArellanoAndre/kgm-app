@@ -24,11 +24,13 @@ export function App() {
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
   const [registrandoTutor, setRegistrandoTutor] = useState(false)
+  const [alumnoTutorId, setAlumnoTutorId] = useState<number | null>(null)
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
     setOpcionGestionAcademica(null)
     setRegistrandoTutor(false)
+    setAlumnoTutorId(null)
 
     if (modulo === 'reportes') {
       setVistaReportes('inicio')
@@ -53,10 +55,10 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        registrandoTutor ? (
-          <RegistrarTutor onCancel={() => setRegistrandoTutor(false)} />
+        registrandoTutor && alumnoTutorId !== null ? (
+          <RegistrarTutor alumnoId={alumnoTutorId} onCancel={() => setRegistrandoTutor(false)} />
         ) : (
-          <EditarAlumno onAbrirRegistroTutor={() => setRegistrandoTutor(true)} />
+          <EditarAlumno onAbrirRegistroTutor={(id) => { setAlumnoTutorId(id); setRegistrandoTutor(true) }} />
         )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (

@@ -25,16 +25,18 @@ function validar(datos: DatosFormulario): FormErrors {
   if (!datos.apellidoPaterno.trim()) errores.apellidoPaterno = 'El apellido paterno es obligatorio.'
   if (!/^[A-Z0-9]{18}$/.test(datos.curp.trim().toUpperCase())) errores.curp = 'El CURP debe tener 18 caracteres alfanuméricos.'
   if (!/^\d{10}$/.test(datos.telefono.trim())) errores.telefono = 'El teléfono debe contener 10 dígitos.'
-  if (!datos.email.trim()) errores.email = 'El correo electrónico es obligatorio.'
-  else if (!emailPattern.test(datos.email.trim())) errores.email = 'Ingresa un correo electrónico válido.'
+  const email = datos.email?.trim() ?? ''
+  if (email && !emailPattern.test(email)) errores.email = 'Ingresa un correo electrónico válido.'
+  if (!datos.parentesco.trim()) errores.parentesco = 'El parentesco es obligatorio.'
   return errores
 }
 
 interface RegistrarTutorProps {
+  alumnoId: number
   onCancel: () => void
 }
 
-export default function RegistrarTutor({ onCancel }: RegistrarTutorProps) {
+export default function RegistrarTutor({ alumnoId, onCancel }: RegistrarTutorProps) {
   const [datos, setDatos] = useState<DatosFormulario>(FORMULARIO_VACIO)
   const [errores, setErrores] = useState<FormErrors>({})
   const [mensaje, setMensaje] = useState<string | null>(null)
@@ -57,7 +59,12 @@ export default function RegistrarTutor({ onCancel }: RegistrarTutorProps) {
 
     setGuardando(true)
     try {
-      await crearTutor({ ...datos, curp: datos.curp.trim().toUpperCase(), email: datos.email.trim().toLowerCase() })
+      await crearTutor({
+        ...datos,
+        alumnoId,
+        curp: datos.curp.trim().toUpperCase(),
+        email: datos.email?.trim().toLowerCase() ?? '',
+      })
       setDatos(FORMULARIO_VACIO)
       setExito(true)
       setMensaje('Tutor guardado exitosamente.')

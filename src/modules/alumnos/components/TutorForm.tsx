@@ -24,8 +24,8 @@ const campos: Array<{
   { key: 'apellidoMaterno', label: 'Apellido materno', maxLength: 100 },
   { key: 'curp', label: 'CURP', required: true, maxLength: 18 },
   { key: 'telefono', label: 'Teléfono', required: true, maxLength: 10, type: 'tel' },
-  { key: 'email', label: 'Correo electrónico', required: true, type: 'email', maxLength: 255 },
-  { key: 'parentesco', label: 'Parentesco', maxLength: 50 },
+  { key: 'email', label: 'Correo electrónico', type: 'email', maxLength: 255 },
+  { key: 'parentesco', label: 'Parentesco', required: true, maxLength: 50 },
   { key: 'direccion', label: 'Dirección' },
 ]
 

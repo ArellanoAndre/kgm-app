@@ -7,7 +7,7 @@ export interface Tutor {
   curp: string
   telefono: string
   email: string
-  parentesco: string | null
+  parentesco: string
   direccion: string | null
 }
 
@@ -18,7 +18,8 @@ export interface CrearTutor {
   apellidoMaterno?: string
   curp: string
   telefono: string
-  email: string
-  parentesco?: string
+  email?: string
+  parentesco: string
+  alumnoId?: number
   direccion?: string
 }
