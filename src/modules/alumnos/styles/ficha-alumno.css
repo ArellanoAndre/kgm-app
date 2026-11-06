@@ -1,0 +1,194 @@
+﻿.ficha-pagina {
+  max-width: 1250px;
+  margin: 0 auto;
+  color: #172033;
+}
+
+.ficha-encabezado {
+  margin-bottom: 20px;
+}
+
+.ficha-encabezado h1 {
+  margin: 10px 0 4px;
+  font-size: 27px;
+  font-weight: 750;
+}
+
+.ficha-encabezado p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ficha-volver {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ficha-perfil {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 24px;
+  margin-bottom: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.ficha-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 78px;
+  height: 78px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.ficha-perfil-contenido {
+  flex: 1;
+}
+
+.ficha-perfil-contenido h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.ficha-perfil-contenido > p {
+  margin: 0 0 14px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ficha-indicadores {
+  display: grid;
+  grid-template-columns: 1fr .7fr 1.4fr .8fr;
+  gap: 10px;
+  max-width: 680px;
+}
+
+.ficha-indicadores .ficha-dato {
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.ficha-dato {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ficha-dato span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.ficha-dato strong {
+  color: #172033;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.ficha-estado {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #dbeafe;
+  color: #2563eb !important;
+}
+
+.ficha-pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.ficha-pestanas button {
+  padding: 11px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ficha-pestanas .ficha-pestana--activa {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.ficha-tarjeta {
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.ficha-tarjeta h3 {
+  margin: 0 0 22px;
+  font-size: 16px;
+}
+
+.ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.ficha-tutor {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.ficha-tutor:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.ficha-tutor h4 {
+  margin: 0 0 18px;
+}
+
+@media (max-width: 850px) {
+  .ficha-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ficha-indicadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .ficha-perfil {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ficha-grid,
+  .ficha-indicadores {
+    grid-template-columns: 1fr;
+  }
+}

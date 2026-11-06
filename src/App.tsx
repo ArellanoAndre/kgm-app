@@ -4,28 +4,35 @@ import type {
   ModuloId,
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
-import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
-import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
+import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
+import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
+import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
+import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
+import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
-import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
-import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 
 type VistaReportes = 'inicio' | 'calificaciones'
+type VistaAlumnos = 'consulta' | 'registro'
 
 export function App() {
   const [moduloActivo, setModuloActivo] =
     useState<ModuloId>('gestion-academica')
+
   const [opcionGestionAcademica, setOpcionGestionAcademica] =
     useState<OpcionGestionAcademicaId | null>(null)
+
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
+  const [vistaAlumnos, setVistaAlumnos] =
+    useState<VistaAlumnos>('consulta')
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
+    setVistaAlumnos('consulta')
     setOpcionGestionAcademica(null)
 
     if (modulo === 'reportes') {
@@ -51,7 +58,15 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        <EditarAlumno />
+        vistaAlumnos === 'registro' ? (
+          <RegistrarAlumno
+            alVolver={() => setVistaAlumnos('consulta')}
+          />
+        ) : (
+          <ConsultarAlumnos
+            alNuevoAlumno={() => setVistaAlumnos('registro')}
+          />
+        )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones
@@ -82,19 +97,16 @@ export function App() {
             <p className="area-prueba__etiqueta">
               Gestión académica
             </p>
-
             <h1 id="opcion-gestion-academica">
               {{
                 'ciclos-escolares': 'Ciclos escolares',
                 'grados-grupos': 'Grados y grupos',
                 materias: 'Materias',
-                'asignar-alumno-grupo':
-                  'Asignar alumno a grupo',
+                'asignar-alumno-grupo': 'Asignar alumno a grupo',
                 'asignar-docente-grupo-materia':
                   'Asignar docente a grupo y materia',
               }[opcionGestionAcademica]}
             </h1>
-
             <p>
               Esta pantalla se implementará en el módulo de
               Gestión académica.
@@ -110,13 +122,11 @@ export function App() {
             <p className="area-prueba__etiqueta">
               Módulo seleccionado
             </p>
-
             <h1 id="modulo-seleccionado">
               {moduloActivo === 'gestion-academica'
                 ? 'Gestión académica'
                 : 'Módulo seleccionado'}
             </h1>
-
             <p>
               Esta pantalla se implementará en el módulo
               correspondiente.
