@@ -1,10 +1,11 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import DashboardLayout from './components/layout/DashboardLayout'
 import type {
   ModuloId,
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
 import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
+import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
@@ -13,6 +14,7 @@ import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificacione
 import './App.css'
 
 type VistaReportes = 'inicio' | 'calificaciones'
+type VistaAlumnos = 'consulta' | 'registro'
 
 export function App() {
   const [moduloActivo, setModuloActivo] =
@@ -25,8 +27,11 @@ export function App() {
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
 
+  const [vistaAlumnos, setVistaAlumnos] = useState<VistaAlumnos>('consulta')
+
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
+    setVistaAlumnos('consulta')
     setOpcionGestionAcademica(null)
 
     if (modulo === 'reportes') {
@@ -52,7 +57,17 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        <ConsultarAlumnos />
+        <>
+  {vistaAlumnos === 'registro' ? (
+    <RegistrarAlumno
+      alVolver={() => setVistaAlumnos('consulta')}
+    />
+  ) : (
+    <ConsultarAlumnos
+      alNuevoAlumno={() => setVistaAlumnos('registro')}
+    />
+  )}
+</>
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones

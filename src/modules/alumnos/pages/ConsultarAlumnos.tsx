@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import FiltrosAlumnos, { type FiltrosAlumno } from '../components/FiltrosAlumnos'
 import TablaAlumnos from '../components/TablaAlumnos'
 import { ALUMNOS_DE_PRUEBA } from '../services/alumnoServicioMock'
@@ -12,7 +12,7 @@ const FILTROS_INICIALES: FiltrosAlumno = {
   estado: 'Todos',
 }
 
-export default function ConsultarAlumnos() {
+export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: () => void }) {
   const [alumnos, setAlumnos] = useState<Alumno[]>(ALUMNOS_DE_PRUEBA)
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)
   const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES)
@@ -78,9 +78,7 @@ export default function ConsultarAlumnos() {
         <button
           className="boton-primario-alumnos"
           type="button"
-          onClick={() =>
-            setMensaje('El formulario de registro estará disponible próximamente.')
-          }
+          onClick={() => alNuevoAlumno?.()}
         >
           + Nuevo alumno
         </button>
