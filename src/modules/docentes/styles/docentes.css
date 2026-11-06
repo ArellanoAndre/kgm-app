@@ -390,6 +390,34 @@
   cursor: pointer;
 }
 
+.dialogo-docente__perfil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 24px;
+}
+
+.dialogo-docente__foto,
+.dialogo-docente__foto-vacia {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+}
+
+.dialogo-docente__foto {
+  object-fit: cover;
+}
+
+.dialogo-docente__foto-vacia {
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
 .pagina-docentes__subtitulo {
   margin: 0 0 6px;
   color: var(--color-text-secondary);

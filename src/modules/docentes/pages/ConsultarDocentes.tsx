@@ -239,8 +239,28 @@ function ConsultarDocentes({
             >
               ×
             </button>
-            <p className="pagina-docentes__subtitulo">Ficha del docente</p>
-            <h2 id="dialogo-docente-titulo">{docenteSeleccionado.nombre}</h2>
+            <div className="dialogo-docente__perfil">
+              {docenteSeleccionado.foto ? (
+                <img
+                  alt={`Foto de ${docenteSeleccionado.nombre}`}
+                  className="dialogo-docente__foto"
+                  src={docenteSeleccionado.foto}
+                />
+              ) : (
+                <span aria-hidden="true" className="dialogo-docente__foto-vacia">
+                  {docenteSeleccionado.nombre
+                    .split(/\s+/)
+                    .slice(0, 2)
+                    .map((parte) => parte[0])
+                    .join('')
+                    .toUpperCase()}
+                </span>
+              )}
+              <div>
+                <p className="pagina-docentes__subtitulo">Ficha del docente</p>
+                <h2 id="dialogo-docente-titulo">{docenteSeleccionado.nombre}</h2>
+              </div>
+            </div>
             <dl>
               <div><dt>CURP</dt><dd>{docenteSeleccionado.curp}</dd></div>
               <div><dt>Correo electrónico</dt><dd>{docenteSeleccionado.correo}</dd></div>
