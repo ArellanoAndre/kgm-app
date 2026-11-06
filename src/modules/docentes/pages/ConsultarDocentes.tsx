@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import FiltrosDocentes from '../components/FiltrosDocentes'
 import TablaDocentes from '../components/TablaDocentes'
+import EditarDocente from './EditarDocente'
 import RegistrarDocente from './RegistrarDocente'
 import {
   actualizarEstadoDocente,
@@ -26,6 +27,7 @@ function ConsultarDocentes({
 }: PropiedadesConsultarDocentes) {
   const [docentes, setDocentes] = useState<Docente[]>([])
   const [mostrarRegistro, setMostrarRegistro] = useState(false)
+  const [docenteEnEdicion, setDocenteEnEdicion] = useState<number | null>(null)
   const [nombreFiltro, setNombreFiltro] = useState('')
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoDocente | 'Todos'>('Todos')
   const [filtrosAplicados, setFiltrosAplicados] = useState<FiltrosAplicados>({
@@ -100,10 +102,6 @@ function ConsultarDocentes({
     }
   }
 
-  function avisarAccionPendiente(accion: string) {
-    setMensaje(accion)
-  }
-
   async function registrarDocente(datos: DatosRegistroDocente) {
     const nuevoDocente = await guardarDocenteEnApi(datos)
     setDocentes((docentesActuales) => [...docentesActuales, nuevoDocente])
@@ -113,6 +111,26 @@ function ConsultarDocentes({
     alLimpiarBusquedaGlobal()
     setMostrarRegistro(false)
     setMensaje(`El docente ${nuevoDocente.nombre} se registró correctamente.`)
+  }
+
+  function guardarEdicion(docenteActualizado: Docente) {
+    setDocentes((docentesActuales) =>
+      docentesActuales.map((docente) =>
+        docente.id === docenteActualizado.id ? docenteActualizado : docente,
+      ),
+    )
+    setDocenteEnEdicion(null)
+    setMensaje(`Los datos de ${docenteActualizado.nombre} se actualizaron correctamente.`)
+  }
+
+  if (docenteEnEdicion !== null) {
+    return (
+      <EditarDocente
+        alCancelar={() => setDocenteEnEdicion(null)}
+        alGuardar={guardarEdicion}
+        docenteId={docenteEnEdicion}
+      />
+    )
   }
 
   if (mostrarRegistro) {
@@ -155,9 +173,7 @@ function ConsultarDocentes({
         ) : (
           <TablaDocentes
             alCambiarEstado={cambiarEstado}
-            alEditar={(docente) =>
-              avisarAccionPendiente(`La edición de ${docente.nombre} se implementará próximamente.`)
-            }
+            alEditar={(docente) => setDocenteEnEdicion(docente.id)}
             alVer={(docente) => setDocenteSeleccionado(docente)}
             docentes={docentesFiltrados}
           />

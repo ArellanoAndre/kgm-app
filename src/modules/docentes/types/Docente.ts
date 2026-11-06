@@ -3,6 +3,9 @@ export type EstadoDocente = 'Activo' | 'Inactivo'
 export type Docente = {
   id: number
   nombre: string
+  nombrePila?: string
+  apellidoPaterno?: string
+  apellidoMaterno?: string
   curp: string
   correo: string
   estado: EstadoDocente

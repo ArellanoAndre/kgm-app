@@ -5,6 +5,9 @@ const ESCUELA_ID = Number(import.meta.env.VITE_ESCUELA_ID)
 
 type DocenteApi = {
   id: number
+  nombre: string
+  apellidoPaterno: string
+  apellidoMaterno: string | null
   nombreCompleto: string
   curp: string
   correo: string | null
@@ -28,6 +31,9 @@ function mapearDocente(docente: DocenteApi): Docente {
   return {
     id: docente.id,
     nombre: docente.nombreCompleto,
+    nombrePila: docente.nombre,
+    apellidoPaterno: docente.apellidoPaterno,
+    apellidoMaterno: docente.apellidoMaterno ?? '',
     curp: docente.curp,
     correo: docente.correo ?? '',
     estado: docente.estado,
@@ -38,6 +44,21 @@ function mapearDocente(docente: DocenteApi): Docente {
     direccion: docente.direccion ?? undefined,
     foto: docente.foto ? `${API_URL}${docente.foto}` : undefined,
   }
+}
+
+function crearFormulario(datos: DatosRegistroDocente): FormData {
+  const formulario = new FormData()
+  formulario.set('nombre', datos.nombre)
+  formulario.set('apellidoPaterno', datos.apellidoPaterno)
+  formulario.set('apellidoMaterno', datos.apellidoMaterno)
+  formulario.set('curp', datos.curp)
+  formulario.set('fechaNacimiento', datos.fechaNacimiento)
+  formulario.set('estado', datos.estado === 'Activo' ? 'ACTIVO' : 'INACTIVO')
+  formulario.set('telefono', datos.telefono)
+  formulario.set('correo', datos.correo)
+  formulario.set('direccion', datos.direccion)
+  if (datos.foto) formulario.set('foto', datos.foto)
+  return formulario
 }
 
 async function procesarError(respuesta: Response): Promise<never> {
@@ -72,26 +93,37 @@ export async function obtenerDocentes(): Promise<Docente[]> {
   return (await procesarRespuesta(respuesta)).map(mapearDocente)
 }
 
+export async function obtenerDocentePorId(id: number): Promise<Docente> {
+  const respuesta = await fetch(
+    `${API_URL}/docentes/${id}?escuelaId=${obtenerEscuelaId()}`,
+  )
+  return procesarDocente(respuesta)
+}
+
 export async function registrarDocente(
   datos: DatosRegistroDocente,
 ): Promise<Docente> {
-  const formulario = new FormData()
+  const formulario = crearFormulario(datos)
   formulario.set('escuelaId', String(obtenerEscuelaId()))
-  formulario.set('nombre', datos.nombre)
-  formulario.set('apellidoPaterno', datos.apellidoPaterno)
-  formulario.set('apellidoMaterno', datos.apellidoMaterno)
-  formulario.set('curp', datos.curp)
-  formulario.set('fechaNacimiento', datos.fechaNacimiento)
-  formulario.set('estado', datos.estado === 'Activo' ? 'ACTIVO' : 'INACTIVO')
-  formulario.set('telefono', datos.telefono)
-  formulario.set('correo', datos.correo)
-  formulario.set('direccion', datos.direccion)
-  if (datos.foto) formulario.set('foto', datos.foto)
 
   const respuesta = await fetch(`${API_URL}/docentes`, {
     method: 'POST',
     body: formulario,
   })
+  return procesarDocente(respuesta)
+}
+
+export async function actualizarDocente(
+  id: number,
+  datos: DatosRegistroDocente,
+): Promise<Docente> {
+  const respuesta = await fetch(
+    `${API_URL}/docentes/${id}?escuelaId=${obtenerEscuelaId()}`,
+    {
+      method: 'PATCH',
+      body: crearFormulario(datos),
+    },
+  )
   return procesarDocente(respuesta)
 }
 
