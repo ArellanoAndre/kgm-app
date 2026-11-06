@@ -252,6 +252,11 @@
   background: #dbeafe;
 }
 
+.insignia-asignacion--sin-asignacion {
+  color: #64748b;
+  background: #e2e8f0;
+}
+
 .tarjeta-asignar-alumno--formulario {
   padding-bottom: 13px;
 }
