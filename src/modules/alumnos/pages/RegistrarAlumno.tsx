@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import '../styles/alumnos.css'
 
 type Props = {
@@ -6,6 +6,7 @@ type Props = {
 }
 
 type DatosAlumno = {
+  matricula: string
   nombre: string
   apellidoPaterno: string
   apellidoMaterno: string
@@ -25,6 +26,7 @@ type DatosAlumno = {
 }
 
 const INICIALES: DatosAlumno = {
+  matricula: '',
   nombre: '',
   apellidoPaterno: '',
   apellidoMaterno: '',
@@ -43,6 +45,11 @@ const INICIALES: DatosAlumno = {
   documentos: [],
 }
 
+type OpcionesEscolares = {
+  ciclos: { id: number; nombre: string }[]
+  grados: { id: number; nombre: string }[]
+  grupos: { id: number; gradoId: number; nombre: string }[]
+}
 const PASOS = [
   'Datos personales',
   'Datos escolares',
@@ -52,6 +59,21 @@ const PASOS = [
 ]
 
 export default function RegistrarAlumno({ alVolver }: Props) {
+  const [opciones, setOpciones] = useState<OpcionesEscolares>({
+    ciclos: [],
+    grados: [],
+    grupos: [],
+  })
+
+  useEffect(() => {
+    fetch('http://localhost:3000/alumnos/asignaciones/opciones?escuelaId=1')
+      .then((respuesta) => {
+        if (!respuesta.ok) throw new Error('No se pudieron cargar las opciones escolares.')
+        return respuesta.json() as Promise<OpcionesEscolares>
+      })
+      .then(setOpciones)
+      .catch((error) => setError(error.message))
+  }, [])
   const [paso, setPaso] = useState(0)
   const [datos, setDatos] = useState<DatosAlumno>(INICIALES)
   const [error, setError] = useState('')
@@ -64,7 +86,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
 
   function siguiente() {
     if (paso === 0) {
-      if (!datos.nombre.trim() || !datos.apellidoPaterno.trim() ||
+      if (!datos.matricula.trim() || !datos.nombre.trim() || !datos.apellidoPaterno.trim() ||
           !datos.curp.trim() || !datos.fechaNacimiento) {
         setError('Completa nombre, apellido paterno, CURP y fecha de nacimiento.')
         return
@@ -91,17 +113,72 @@ export default function RegistrarAlumno({ alVolver }: Props) {
     setPaso((actual) => Math.min(actual + 1, PASOS.length - 1))
   }
 
-  function enviar(evento: FormEvent<HTMLFormElement>) {
+  async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
+
     if (paso !== PASOS.length - 1) {
       siguiente()
       return
     }
 
-    // Solo demostración visual; todavía no se guarda en una base de datos.
-    setFinalizado(true)
-  }
+    const gradoSeleccionado = opciones.grados.find(
+      (grado) => grado.nombre === datos.grado,
+    )
 
+    const grupoSeleccionado = opciones.grupos.find(
+      (grupo) =>
+        grupo.gradoId === gradoSeleccionado?.id &&
+        grupo.nombre === datos.grupo,
+    )
+
+    const cicloSeleccionado = opciones.ciclos[0]
+
+    if (!grupoSeleccionado || !cicloSeleccionado) {
+      setError('Selecciona un grado y grupo disponibles.')
+      return
+    }
+    setError('')
+
+    try {
+      const respuesta = await fetch('http://localhost:3000/alumnos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          escuelaId: 1,
+          grupoId: grupoSeleccionado.id,
+          cicloId: cicloSeleccionado.id,
+          matricula: datos.matricula.trim(),
+          curp: datos.curp.trim().toUpperCase(),
+          nombre: datos.nombre.trim(),
+          apellidoPaterno: datos.apellidoPaterno.trim(),
+          apellidoMaterno: datos.apellidoMaterno.trim(),
+          fechaNacimiento: datos.fechaNacimiento,
+          genero: datos.genero || undefined,
+          telefono: datos.telefono || undefined,
+          correo: datos.correo || undefined,
+          direccion: datos.direccion || undefined,
+        }),
+      })
+
+      if (!respuesta.ok) {
+        if (respuesta.status === 409) {
+          throw new Error('La matrícula o CURP ya está registrada.')
+        }
+
+        throw new Error(`No se pudo registrar el alumno (HTTP ${respuesta.status}).`)
+      }
+
+      setFinalizado(true)
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error al registrar el alumno.',
+      )
+    }
+  }
   const campo = (
     titulo: string,
     clave: keyof DatosAlumno,
@@ -255,6 +332,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
 
         {paso === 0 && (
           <div className="registro-grid">
+            {campo('Matrícula', 'matricula', 'text', true)}
             {campo('Nombre(s)', 'nombre', 'text', true)}
             {campo('Apellido paterno', 'apellidoPaterno', 'text', true)}
             {campo('Apellido materno', 'apellidoMaterno')}
@@ -282,10 +360,10 @@ export default function RegistrarAlumno({ alVolver }: Props) {
             <label className="registro-campo">
               <span>Grado *</span>
               <select value={datos.grado}
-                onChange={(e) => actualizar('grado', e.target.value)}>
+                onChange={(e) => { actualizar('grado', e.target.value); setDatos((actuales) => ({ ...actuales, grupo: '' })) }}>
                 <option value="">Seleccionar grado</option>
-                {['1°', '2°', '3°', '4°', '5°', '6°'].map((grado) =>
-                  <option key={grado}>{grado}</option>)}
+                {opciones.grados.map((grado) =>
+                  <option key={grado.id} value={grado.nombre}>{grado.nombre}</option>)}
               </select>
             </label>
             <label className="registro-campo">
@@ -293,8 +371,14 @@ export default function RegistrarAlumno({ alVolver }: Props) {
               <select value={datos.grupo}
                 onChange={(e) => actualizar('grupo', e.target.value)}>
                 <option value="">Seleccionar grupo</option>
-                {['A', 'B', 'C', 'D'].map((grupo) =>
-                  <option key={grupo}>{grupo}</option>)}
+                {opciones.grupos
+                  .filter((grupo) =>
+                    grupo.gradoId === opciones.grados.find(
+                      (grado) => grado.nombre === datos.grado,
+                    )?.id,
+                  )
+                  .map((grupo) =>
+                  <option key={grupo.id} value={grupo.nombre}>{grupo.nombre}</option>)}
               </select>
             </label>
             <label className="registro-campo">
@@ -378,8 +462,8 @@ export default function RegistrarAlumno({ alVolver }: Props) {
   )}
 </div>
             <p className="registro-aviso">
-              Al confirmar se mostrará una pantalla de éxito de prueba.
-              No se enviarán datos al servidor.
+              Al confirmar se registrará el alumno en el sistema.
+              Verifica que los datos sean correctos antes de continuar.
             </p>
           </div>
         )}
