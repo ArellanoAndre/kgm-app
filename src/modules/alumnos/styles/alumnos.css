@@ -4,6 +4,44 @@
   margin: 0 auto;
 }
 
+.expediente-card {
+  margin-top: 12px;
+}
+
+.document-upload {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.document-upload label {
+  display: grid;
+  gap: 4px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.document-upload select,
+.document-upload input {
+  min-height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.document-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.document-list a {
+  color: var(--color-primary);
+  font-size: 11px;
+}
+
 .page-heading {
   display: flex;
   align-items: flex-start;
@@ -282,6 +320,65 @@
 
 .page-state--error {
   color: #b91c1c;
+}
+
+.tutor-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 22px 24px 48px;
+  color: #182230;
+}
+
+.tutor-heading,
+.tutor-panel-title,
+.tutor-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tutor-heading { margin-bottom: 12px; align-items: flex-end; }
+.tutor-heading h1 { margin: 0; font-size: 23px; }
+.tutor-heading p, .tutor-panel > p { margin: 4px 0 0; color: #737d8c; font-size: 11px; }
+.tutor-back { display: block; margin: 0 0 7px; padding: 0; border: 0; background: none; color: #2563eb; font-size: 11px; cursor: pointer; }
+.tutor-student-card, .tutor-panel { margin-bottom: 10px; padding: 12px; border: 1px solid #e3e7ed; border-radius: 7px; background: #fff; box-shadow: 0 1px 2px #17203308; }
+.tutor-student-card { display: flex; gap: 15px; }
+.tutor-avatar { display: grid; flex: 0 0 48px; place-items: center; height: 48px; border: 1px solid #e3e7ed; border-radius: 50%; color: #687386; font-size: 10px; }
+.tutor-student-card h2 { margin: 0; font-size: 18px; }
+.tutor-student-card p { margin: 3px 0 9px; color: #737d8c; font-size: 10px; }
+.tutor-student-data { display: flex; gap: 7px; flex-wrap: wrap; }
+.tutor-student-data span { display: grid; gap: 3px; min-width: 100px; padding: 6px 9px; border: 1px solid #e3e7ed; border-radius: 4px; font-size: 10px; }
+.tutor-student-data b, .tutor-associated-list b { color: #667085; font-size: 8px; }
+.tutor-student-data em { color: #2563eb; font-style: normal; }
+.tutor-panel h2 { margin: 0; font-size: 12px; }
+.tutor-panel-title { align-items: center; margin-bottom: 9px; }
+.tutor-panel-title > span { padding: 4px 8px; border: 1px solid #e3e7ed; border-radius: 12px; color: #667085; font-size: 9px; }
+.tutor-associated-list { display: grid; gap: 7px; }
+.tutor-associated-list article { display: grid; grid-template-columns: 1.1fr .8fr 1fr 1.2fr 1fr 1.5fr; gap: 4px 10px; align-items: center; padding: 9px 10px; border: 1px solid #e6e9ee; border-radius: 5px; background: #fafbfc; font-size: 10px; }
+.tutor-associated-list small { color: #7b8490; }
+.tutor-associated-list span { color: #667085; font-size: 10px; }
+.tutor-muted { color: #7b8490; font-size: 10px; }
+.tutor-search { width: 245px; height: 32px; margin-top: 8px; border: 1px solid #dfe4eb; border-radius: 5px; padding: 0 9px; font-size: 10px; }
+.tutor-form > p { margin-bottom: 12px; }
+.tutor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px 10px; }
+.tutor-grid label, .tutor-principal { display: grid; gap: 4px; min-width: 0; }
+.tutor-grid label > span, .tutor-principal > span { color: #273243; font-size: 9px; }
+.tutor-grid input, .tutor-grid select, .tutor-principal select { width: 100%; min-height: 31px; border: 1px solid #dfe4eb; border-radius: 5px; padding: 0 8px; color: #273243; background: #fff; font-size: 10px; }
+.tutor-span-3 { grid-column: 1 / -1; }
+.tutor-principal { margin-top: 10px; }
+.tutor-note { display: grid; gap: 2px; margin-top: 10px; padding: 8px 10px; border: 1px solid #bfdbfe; border-radius: 5px; background: #eff6ff; color: #2563eb; font-size: 9px; }
+.tutor-note span { font-size: 8px; }
+.tutor-actions { align-items: center; margin: 12px -12px -12px; padding: 10px 12px; border-top: 1px solid #e6e9ee; color: #667085; font-size: 9px; }
+.tutor-actions > div { display: flex; gap: 7px; }
+
+@media (max-width: 760px) {
+  .tutor-page { padding: 18px 12px 34px; }
+  .tutor-heading { flex-direction: column; align-items: stretch; }
+  .tutor-grid { grid-template-columns: 1fr; }
+  .tutor-span-3 { grid-column: auto; }
+  .tutor-associated-list article { grid-template-columns: 1fr 1fr; }
+  .tutor-actions { align-items: stretch; flex-direction: column; }
 }
 
 @media (max-width: 1080px) {

@@ -3,6 +3,8 @@ import { AlumnoForm } from '../components/AlumnoForm'
 import { actualizarAlumno, obtenerAlumnoPorId } from '../services/alumnoService'
 import type { Alumno, AlumnoEditable } from '../types/Alumno'
 import '../styles/alumnos.css'
+import { listarDocumentos, subirDocumento, urlDocumento } from '../services/documentoService'
+import { TIPOS_DOCUMENTO, type DocumentoAlumno } from '../types/documentos'
 
 type FormErrors = Partial<Record<string, string>>
 type FeedbackKind = 'success' | 'info' | 'error'
@@ -10,6 +12,7 @@ type FeedbackKind = 'success' | 'info' | 'error'
 interface EditarAlumnoProps {
   alumnoId?: number
   onAbrirRegistroTutor?: (alumnoId: number) => void
+  onAbrirExpediente?: (alumnoId: number) => void
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -41,7 +44,7 @@ function validate(alumno: Alumno): FormErrors {
   return errors
 }
 
-export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: EditarAlumnoProps) {
+export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor, onAbrirExpediente }: EditarAlumnoProps) {
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [original, setOriginal] = useState<Alumno | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -50,6 +53,10 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
   const [message, setMessage] = useState<string | null>(null)
   const [feedbackKind, setFeedbackKind] = useState<FeedbackKind>('info')
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [documentos, setDocumentos] = useState<DocumentoAlumno[]>([])
+  const [tipoDocumento, setTipoDocumento] = useState(TIPOS_DOCUMENTO[0])
+  const [archivo, setArchivo] = useState<File | null>(null)
+  const [documentoMessage, setDocumentoMessage] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -64,7 +71,22 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
         setLoadError(error instanceof Error ? error.message : 'No fue posible cargar la información del alumno.')
       })
       .finally(() => setLoading(false))
+    listarDocumentos(alumnoId).then(setDocumentos).catch(() => setDocumentoMessage('No fue posible consultar el expediente.'))
   }, [alumnoId])
+
+  const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!archivo) return setDocumentoMessage('Selecciona un archivo.')
+    try {
+      const documento = await subirDocumento(alumnoId, tipoDocumento, archivo)
+      setDocumentos((actuales) => [documento, ...actuales])
+      setArchivo(null)
+      event.currentTarget.reset()
+      setDocumentoMessage('Documento adjuntado correctamente.')
+    } catch (error) {
+      setDocumentoMessage(error instanceof Error ? error.message : 'No fue posible adjuntar el documento.')
+    }
+  }
 
   const fullName = useMemo(() => {
     if (!alumno) return ''
@@ -134,6 +156,11 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
             Registrar tutor
           </button>
         )}
+        {onAbrirExpediente && (
+          <button className="button button--secondary button--top" type="button" onClick={() => onAbrirExpediente(alumno.id)}>
+            Expediente digital
+          </button>
+        )}
       </div>
 
       {message && <div className={`feedback-banner feedback-banner--${feedbackKind}`} role="status">{message}</div>}
@@ -149,6 +176,16 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />
+      <section className="alumno-card expediente-card">
+        <h2>Expediente digital</h2>
+        <form className="document-upload" onSubmit={handleUpload}>
+          <label><span>Tipo de documento</span><select value={tipoDocumento} onChange={(event) => setTipoDocumento(event.target.value as typeof tipoDocumento)}>{TIPOS_DOCUMENTO.map((tipo) => <option key={tipo}>{tipo}</option>)}</select></label>
+          <label><span>Archivo PDF, JPG o PNG (máximo 5 MB)</span><input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => setArchivo(event.target.files?.[0] ?? null)} /></label>
+          <button className="button button--secondary" type="submit">Adjuntar documento</button>
+        </form>
+        {documentoMessage && <p className="form-caption">{documentoMessage}</p>}
+        <div className="document-list">{documentos.map((documento) => <a key={documento.id} href={urlDocumento(documento.id)} target="_blank" rel="noreferrer">{documento.tipo} · {documento.nombreArchivo}</a>)}</div>
+      </section>
     </section>
   )
 }

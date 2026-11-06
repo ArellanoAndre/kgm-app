@@ -5,6 +5,7 @@ import type {
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
 import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
+import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
 import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
@@ -25,12 +26,14 @@ export function App() {
     useState<VistaReportes>('inicio')
   const [registrandoTutor, setRegistrandoTutor] = useState(false)
   const [alumnoTutorId, setAlumnoTutorId] = useState<number | null>(null)
+  const [mostrandoExpediente, setMostrandoExpediente] = useState(false)
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
     setOpcionGestionAcademica(null)
     setRegistrandoTutor(false)
     setAlumnoTutorId(null)
+    setMostrandoExpediente(false)
 
     if (modulo === 'reportes') {
       setVistaReportes('inicio')
@@ -55,10 +58,12 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        registrandoTutor && alumnoTutorId !== null ? (
+        mostrandoExpediente ? (
+          <ExpedienteDigital alumnoId={alumnoTutorId ?? 1} onVolver={() => setMostrandoExpediente(false)} />
+        ) : registrandoTutor && alumnoTutorId !== null ? (
           <RegistrarTutor alumnoId={alumnoTutorId} onCancel={() => setRegistrandoTutor(false)} />
         ) : (
-          <EditarAlumno onAbrirRegistroTutor={(id) => { setAlumnoTutorId(id); setRegistrandoTutor(true) }} />
+          <EditarAlumno onAbrirRegistroTutor={(id) => { setAlumnoTutorId(id); setRegistrandoTutor(true) }} onAbrirExpediente={(id) => { setAlumnoTutorId(id); setMostrandoExpediente(true) }} />
         )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
