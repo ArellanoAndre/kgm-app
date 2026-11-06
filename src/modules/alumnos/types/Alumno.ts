@@ -1,32 +1,31 @@
-﻿export type EstadoAlumno = 'Activo' | 'Baja' | 'Egresado'
+export type EstadoAlumno = 'Activo' | 'Baja' | 'Egresado'
 
-export type GeneroAlumno = 'Femenino' | 'Masculino' | 'Otro' | 'Prefiero no decirlo'
-
-export type Tutor = {
-  id: number
+export interface TutorAlumno {
   nombre: string
-  apellidoPaterno: string
-  apellidoMaterno: string
   parentesco: string
   telefono: string
   correo: string
-  direccion: string
-  esPrincipal: boolean
+  domicilio: string
+  observaciones: string
 }
 
-export type Alumno = {
+export interface DocumentoAlumno {
+  tipo: string
+  nombreArchivo: string
+}
+
+export interface Alumno {
   id: number
-  nombre: string
+  nombres: string
   apellidoPaterno: string
   apellidoMaterno: string
   curp: string
   fechaNacimiento: string
-  genero: GeneroAlumno
+  genero: string
   nacionalidad: string
   telefono: string
   correo: string
   direccion: string
-  foto?: string
   grado: string
   grupo: string
   cicloEscolar: string
@@ -34,7 +33,22 @@ export type Alumno = {
   turno: string
   fechaIngreso: string
   observaciones: string
-  tutores: Tutor[]
+  tutor: TutorAlumno
+  documentos: DocumentoAlumno[]
 }
 
-export type DatosRegistroAlumno = Omit<Alumno, 'id'>
+export type AlumnoEditable = Pick<
+  Alumno,
+  | 'nombres'
+  | 'apellidoPaterno'
+  | 'apellidoMaterno'
+  | 'fechaNacimiento'
+  | 'genero'
+  | 'nacionalidad'
+  | 'telefono'
+  | 'correo'
+  | 'direccion'
+  | 'turno'
+  | 'fechaIngreso'
+  | 'observaciones'
+>

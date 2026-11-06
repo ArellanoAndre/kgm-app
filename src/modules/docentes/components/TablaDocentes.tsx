@@ -38,8 +38,28 @@ function TablaDocentes({
           {docentes.map((docente) => (
             <tr key={docente.id}>
               <td>
-                <span className="tabla-docentes__nombre">{docente.nombre}</span>
-                <span className="tabla-docentes__ciclo">{docente.ciclo}</span>
+                <div className="tabla-docentes__identidad">
+                  {docente.foto ? (
+                    <img
+                      alt={`Foto de ${docente.nombre}`}
+                      className="tabla-docentes__foto"
+                      src={docente.foto}
+                    />
+                  ) : (
+                    <span aria-hidden="true" className="tabla-docentes__foto-vacia">
+                      {docente.nombre
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((parte) => parte[0])
+                        .join('')
+                        .toUpperCase()}
+                    </span>
+                  )}
+                  <span>
+                    <span className="tabla-docentes__nombre">{docente.nombre}</span>
+                    <span className="tabla-docentes__ciclo">{docente.ciclo}</span>
+                  </span>
+                </div>
               </td>
               <td className="tabla-docentes__dato">{docente.curp}</td>
               <td className="tabla-docentes__dato">{docente.correo}</td>

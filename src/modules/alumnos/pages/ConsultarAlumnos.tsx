@@ -2,7 +2,7 @@
 import FiltrosAlumnos, { type FiltrosAlumno } from '../components/FiltrosAlumnos'
 import TablaAlumnos from '../components/TablaAlumnos'
 import { ALUMNOS_DE_PRUEBA } from '../services/alumnoServicioMock'
-import type { Alumno } from '../types/Alumno'
+import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 import '../styles/alumnos.css'
 
 const FILTROS_INICIALES: FiltrosAlumno = {
@@ -159,3 +159,4 @@ export default function ConsultarAlumnos() {
     </section>
   )
 }
+

@@ -1,11 +1,11 @@
-import type { Alumno } from '../types/Alumno'
+﻿import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 
 export const ALUMNOS_DE_PRUEBA: Alumno[] = [
   {
     id: 1,
     nombre: 'Ana',
-    apellidoPaterno: 'García',
-    apellidoMaterno: 'López',
+    apellidoPaterno: 'GarcÃ­a',
+    apellidoMaterno: 'LÃ³pez',
     curp: 'GALA160101MDFRPN07',
     fechaNacimiento: '2016-01-01',
     genero: 'Femenino',
@@ -13,7 +13,7 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     telefono: '5512345678',
     correo: 'ana.garcia@alumno.escuela.edu.mx',
     direccion: 'Calle de las Flores 18, Col. Centro',
-    grado: '5°',
+    grado: '5Â°',
     grupo: 'A',
     cicloEscolar: '2026-2027',
     estado: 'Activo',
@@ -24,7 +24,7 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
       {
         id: 1,
         nombre: 'Juan',
-        apellidoPaterno: 'García',
+        apellidoPaterno: 'GarcÃ­a',
         apellidoMaterno: '',
         parentesco: 'Padre',
         telefono: '5598765432',
@@ -37,16 +37,16 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
   {
     id: 2,
     nombre: 'Luis',
-    apellidoPaterno: 'Pérez',
-    apellidoMaterno: 'Ramírez',
+    apellidoPaterno: 'PÃ©rez',
+    apellidoMaterno: 'RamÃ­rez',
     curp: 'PERL140205HDFRMS03',
     fechaNacimiento: '2014-02-05',
     genero: 'Masculino',
     nacionalidad: 'Mexicana',
     telefono: '5512345679',
     correo: 'luis.perez@alumno.escuela.edu.mx',
-    direccion: 'Ciudad de México',
-    grado: '6°',
+    direccion: 'Ciudad de MÃ©xico',
+    grado: '6Â°',
     grupo: 'B',
     cicloEscolar: '2026-2027',
     estado: 'Baja',
@@ -56,8 +56,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     tutores: [
       {
         id: 2,
-        nombre: 'María',
-        apellidoPaterno: 'Ramírez',
+        nombre: 'MarÃ­a',
+        apellidoPaterno: 'RamÃ­rez',
         apellidoMaterno: '',
         parentesco: 'Madre',
         telefono: '',
@@ -69,8 +69,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
   },
   {
     id: 3,
-    nombre: 'Sofía',
-    apellidoPaterno: 'Martínez',
+    nombre: 'SofÃ­a',
+    apellidoPaterno: 'MartÃ­nez',
     apellidoMaterno: 'Torres',
     curp: 'MATS170310MDFRRF06',
     fechaNacimiento: '2017-03-10',
@@ -78,8 +78,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     nacionalidad: 'Mexicana',
     telefono: '5512345680',
     correo: 'sofia.martinez@alumno.escuela.edu.mx',
-    direccion: 'Ciudad de México',
-    grado: '4°',
+    direccion: 'Ciudad de MÃ©xico',
+    grado: '4Â°',
     grupo: 'A',
     cicloEscolar: '2026-2027',
     estado: 'Activo',
@@ -89,8 +89,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     tutores: [
       {
         id: 2,
-        nombre: 'María',
-        apellidoPaterno: 'Ramírez',
+        nombre: 'MarÃ­a',
+        apellidoPaterno: 'RamÃ­rez',
         apellidoMaterno: '',
         parentesco: 'Madre',
         telefono: '',
@@ -103,7 +103,7 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
   {
     id: 4,
     nombre: 'Diego',
-    apellidoPaterno: 'Hernández',
+    apellidoPaterno: 'HernÃ¡ndez',
     apellidoMaterno: 'Cruz',
     curp: 'HECD110415HDFRRG05',
     fechaNacimiento: '2011-04-15',
@@ -111,8 +111,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     nacionalidad: 'Mexicana',
     telefono: '5512345681',
     correo: 'diego.hernandez@alumno.escuela.edu.mx',
-    direccion: 'Ciudad de México',
-    grado: '3° Sec.',
+    direccion: 'Ciudad de MÃ©xico',
+    grado: '3Â° Sec.',
     grupo: 'C',
     cicloEscolar: '2026-2027',
     estado: 'Egresado',
@@ -122,8 +122,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     tutores: [
       {
         id: 2,
-        nombre: 'María',
-        apellidoPaterno: 'Ramírez',
+        nombre: 'MarÃ­a',
+        apellidoPaterno: 'RamÃ­rez',
         apellidoMaterno: '',
         parentesco: 'Madre',
         telefono: '',
@@ -137,15 +137,15 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     id: 5,
     nombre: 'Valentina',
     apellidoPaterno: 'Ruiz',
-    apellidoMaterno: 'Sánchez',
+    apellidoMaterno: 'SÃ¡nchez',
     curp: 'RUSV180522MDFZNL04',
     fechaNacimiento: '2018-05-22',
     genero: 'Femenino',
     nacionalidad: 'Mexicana',
     telefono: '5512345682',
     correo: 'valentina.ruiz@alumno.escuela.edu.mx',
-    direccion: 'Ciudad de México',
-    grado: '3°',
+    direccion: 'Ciudad de MÃ©xico',
+    grado: '3Â°',
     grupo: 'B',
     cicloEscolar: '2026-2027',
     estado: 'Activo',
@@ -155,8 +155,8 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     tutores: [
       {
         id: 2,
-        nombre: 'María',
-        apellidoPaterno: 'Ramírez',
+        nombre: 'MarÃ­a',
+        apellidoPaterno: 'RamÃ­rez',
         apellidoMaterno: '',
         parentesco: 'Madre',
         telefono: '',
@@ -167,3 +167,4 @@ export const ALUMNOS_DE_PRUEBA: Alumno[] = [
     ]
   }
 ]
+

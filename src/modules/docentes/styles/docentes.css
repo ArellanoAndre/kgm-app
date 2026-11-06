@@ -186,6 +186,33 @@
   border-bottom: 0;
 }
 
+.tabla-docentes__identidad {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabla-docentes__foto,
+.tabla-docentes__foto-vacia {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+}
+
+.tabla-docentes__foto {
+  object-fit: cover;
+}
+
+.tabla-docentes__foto-vacia {
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
 .tabla-docentes__nombre,
 .tabla-docentes__ciclo {
   display: block;
@@ -361,6 +388,34 @@
   border: 0;
   font-size: 24px;
   cursor: pointer;
+}
+
+.dialogo-docente__perfil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-right: 24px;
+}
+
+.dialogo-docente__foto,
+.dialogo-docente__foto-vacia {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: 50%;
+}
+
+.dialogo-docente__foto {
+  object-fit: cover;
+}
+
+.dialogo-docente__foto-vacia {
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .pagina-docentes__subtitulo {

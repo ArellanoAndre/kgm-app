@@ -1,11 +1,11 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
 import type { DatosRegistroDocente, Docente } from '../types/Docente'
 import '../styles/docentes.css'
 
 type PropiedadesRegistrarDocente = {
   docentesExistentes: Docente[]
   alCancelar: () => void
-  alGuardar: (datos: DatosRegistroDocente) => void
+  alGuardar: (datos: DatosRegistroDocente) => Promise<void>
 }
 
 type ErroresFormulario = Partial<Record<keyof DatosRegistroDocente, string>>
@@ -32,6 +32,15 @@ function RegistrarDocente({
   const [datos, setDatos] = useState<DatosRegistroDocente>(FORMULARIO_VACIO)
   const [errores, setErrores] = useState<ErroresFormulario>({})
   const [errorFoto, setErrorFoto] = useState('')
+  const [fotoVista, setFotoVista] = useState('')
+  const [errorEnvio, setErrorEnvio] = useState('')
+  const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    return () => {
+      if (fotoVista) URL.revokeObjectURL(fotoVista)
+    }
+  }, [fotoVista])
 
   function cambiarCampo(campo: keyof DatosRegistroDocente, valor: string) {
     setDatos((actuales) => ({ ...actuales, [campo]: valor }))
@@ -43,8 +52,8 @@ function RegistrarDocente({
     evento.target.value = ''
     if (!archivo) return
 
-    if (!archivo.type.startsWith('image/')) {
-      setErrorFoto('Selecciona un archivo de imagen válido.')
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(archivo.type)) {
+      setErrorFoto('Selecciona una imagen JPG, PNG o WebP.')
       return
     }
 
@@ -53,20 +62,9 @@ function RegistrarDocente({
       return
     }
 
-    const lector = new FileReader()
-    lector.onload = () => {
-      const resultado = lector.result
-      if (typeof resultado === 'string') {
-        setDatos((actuales) => ({ ...actuales, foto: resultado }))
-        setErrorFoto('')
-      } else {
-        setErrorFoto('No se pudo leer la imagen. Intenta con otro archivo.')
-      }
-    }
-    lector.onerror = () => {
-      setErrorFoto('No se pudo leer la imagen. Intenta con otro archivo.')
-    }
-    lector.readAsDataURL(archivo)
+    setDatos((actuales) => ({ ...actuales, foto: archivo }))
+    setFotoVista(URL.createObjectURL(archivo))
+    setErrorFoto('')
   }
 
   function validar(): ErroresFormulario {
@@ -113,23 +111,33 @@ function RegistrarDocente({
     return nuevosErrores
   }
 
-  function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
+  async function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
     const nuevosErrores = validar()
     setErrores(nuevosErrores)
 
     if (Object.keys(nuevosErrores).length > 0) return
 
-    alGuardar({
-      ...datos,
-      nombre: datos.nombre.trim(),
-      apellidoPaterno: datos.apellidoPaterno.trim(),
-      apellidoMaterno: datos.apellidoMaterno.trim(),
-      curp: datos.curp.trim().toUpperCase(),
-      telefono: datos.telefono.trim(),
-      correo: datos.correo.trim().toLocaleLowerCase(),
-      direccion: datos.direccion.trim(),
-    })
+    setGuardando(true)
+    setErrorEnvio('')
+    try {
+      await alGuardar({
+        ...datos,
+        nombre: datos.nombre.trim(),
+        apellidoPaterno: datos.apellidoPaterno.trim(),
+        apellidoMaterno: datos.apellidoMaterno.trim(),
+        curp: datos.curp.trim().toUpperCase(),
+        telefono: datos.telefono.trim(),
+        correo: datos.correo.trim().toLocaleLowerCase(),
+        direccion: datos.direccion.trim(),
+      })
+    } catch (error) {
+      setErrorEnvio(
+        error instanceof Error ? error.message : 'No se pudo registrar el docente.',
+      )
+    } finally {
+      setGuardando(false)
+    }
   }
 
   function campoTexto(
@@ -190,13 +198,6 @@ function RegistrarDocente({
           <h1 id="titulo-registro-docente">Registrar docente</h1>
           <p>Captura la información del nuevo docente</p>
         </div>
-        <button
-          className="pagina-docentes__nuevo"
-          form="formulario-registro-docente"
-          type="submit"
-        >
-          Guardar docente
-        </button>
       </header>
 
       <form
@@ -219,8 +220,8 @@ function RegistrarDocente({
             <div className="formulario-docente__principal">
               <div className="foto-docente">
                 <div className="foto-docente__vista">
-                  {datos.foto ? (
-                    <img alt="Vista previa del docente" src={datos.foto} />
+                  {fotoVista ? (
+                    <img alt="Vista previa del docente" src={fotoVista} />
                   ) : (
                     <span>DOC</span>
                   )}
@@ -234,7 +235,7 @@ function RegistrarDocente({
                   Subir
                 </label>
                 <input
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   className="visualmente-oculto"
                   id="foto-docente"
                   onChange={manejarFoto}
@@ -375,18 +376,24 @@ function RegistrarDocente({
           </div>
         </div>
 
+        {errorEnvio && (
+          <p className="formulario-docente__error" role="alert">
+            {errorEnvio}
+          </p>
+        )}
         <footer className="tarjeta-registro-docente__pie">
           <span>Formulario de registro</span>
           <div>
             <button
               className="boton-secundario-docente"
               onClick={alCancelar}
+              disabled={guardando}
               type="button"
             >
               Cancelar
             </button>
-            <button className="pagina-docentes__nuevo" type="submit">
-              Guardar docente
+            <button className="pagina-docentes__nuevo" disabled={guardando} type="submit">
+              {guardando ? 'Guardando…' : 'Guardar docente'}
             </button>
           </div>
         </footer>

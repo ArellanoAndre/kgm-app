@@ -1,4 +1,4 @@
-﻿import type { Alumno } from '../types/Alumno'
+﻿import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 
 type Propiedades = {
   alumnos: Alumno[]
@@ -116,3 +116,4 @@ export default function TablaAlumnos({
     </div>
   )
 }
+
