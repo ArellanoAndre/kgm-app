@@ -1,6 +1,6 @@
-﻿import type { AlumnoConsulta } from '../types/AlumnoConsulta'
+import type { AlumnoConsulta } from '../types/AlumnoConsulta'
 
-const API = 'http://localhost:3000'
+const API = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:3000'
 
 type AlumnoApi = {
   id: number

@@ -1,3 +1,4 @@
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:3000'
 import { useEffect, useState, type FormEvent } from 'react'
 import '../styles/alumnos.css'
 
@@ -66,7 +67,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
   })
 
   useEffect(() => {
-    fetch('http://localhost:3000/alumnos/asignaciones/opciones?escuelaId=1')
+    fetch(`${API_URL}/alumnos/asignaciones/opciones?escuelaId=1`)
       .then((respuesta) => {
         if (!respuesta.ok) throw new Error('No se pudieron cargar las opciones escolares.')
         return respuesta.json() as Promise<OpcionesEscolares>
@@ -140,7 +141,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
     setError('')
 
     try {
-      const respuesta = await fetch('http://localhost:3000/alumnos', {
+      const respuesta = await fetch(`${API_URL}/alumnos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
