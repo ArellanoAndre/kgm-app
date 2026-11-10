@@ -7,29 +7,38 @@ import type {
 import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
 import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
 import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
-import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
+import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
+import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
+import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
+import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
+import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
-import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
 
 type VistaReportes = 'inicio' | 'calificaciones'
+type VistaAlumnos = 'consulta' | 'registro'
 
 export function App() {
   const [moduloActivo, setModuloActivo] =
     useState<ModuloId>('gestion-academica')
+
   const [opcionGestionAcademica, setOpcionGestionAcademica] =
     useState<OpcionGestionAcademicaId | null>(null)
+
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
   const [registrandoTutor, setRegistrandoTutor] = useState(false)
   const [alumnoTutorId, setAlumnoTutorId] = useState<number | null>(null)
   const [mostrandoExpediente, setMostrandoExpediente] = useState(false)
+  const [vistaAlumnos, setVistaAlumnos] =
+    useState<VistaAlumnos>('consulta')
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
+    setVistaAlumnos('consulta')
     setOpcionGestionAcademica(null)
     setRegistrandoTutor(false)
     setAlumnoTutorId(null)
@@ -62,8 +71,11 @@ export function App() {
           <ExpedienteDigital alumnoId={alumnoTutorId ?? 1} onVolver={() => setMostrandoExpediente(false)} />
         ) : registrandoTutor && alumnoTutorId !== null ? (
           <RegistrarTutor alumnoId={alumnoTutorId} onCancel={() => setRegistrandoTutor(false)} />
+        ) : vistaAlumnos === 'registro' ? (
+          <RegistrarAlumno alVolver={() => setVistaAlumnos('consulta')} />
         ) : (
-          <EditarAlumno onAbrirRegistroTutor={(id) => { setAlumnoTutorId(id); setRegistrandoTutor(true) }} onAbrirExpediente={(id) => { setAlumnoTutorId(id); setMostrandoExpediente(true) }} />
+          <ConsultarAlumnos alNuevoAlumno={() => setVistaAlumnos('registro')} />
+        )
         )
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
@@ -83,6 +95,9 @@ export function App() {
         opcionGestionAcademica === 'ciclos-escolares' ? (
         <GestionCiclosEscolares />
       ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'materias' ? (
+        <GestionMaterias />
+      ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica ? (
         <section
           className="area-prueba"
@@ -92,19 +107,16 @@ export function App() {
             <p className="area-prueba__etiqueta">
               Gestión académica
             </p>
-
             <h1 id="opcion-gestion-academica">
               {{
                 'ciclos-escolares': 'Ciclos escolares',
                 'grados-grupos': 'Grados y grupos',
                 materias: 'Materias',
-                'asignar-alumno-grupo':
-                  'Asignar alumno a grupo',
+                'asignar-alumno-grupo': 'Asignar alumno a grupo',
                 'asignar-docente-grupo-materia':
                   'Asignar docente a grupo y materia',
               }[opcionGestionAcademica]}
             </h1>
-
             <p>
               Esta pantalla se implementará en el módulo de
               Gestión académica.
@@ -120,13 +132,11 @@ export function App() {
             <p className="area-prueba__etiqueta">
               Módulo seleccionado
             </p>
-
             <h1 id="modulo-seleccionado">
               {moduloActivo === 'gestion-academica'
                 ? 'Gestión académica'
                 : 'Módulo seleccionado'}
             </h1>
-
             <p>
               Esta pantalla se implementará en el módulo
               correspondiente.
