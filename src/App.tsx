@@ -4,7 +4,6 @@ import type {
   ModuloId,
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
-import EditarAlumno from './modules/alumnos/pages/EditarAlumno'
 import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
 import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
 import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
@@ -74,9 +73,19 @@ export function App() {
         ) : vistaAlumnos === 'registro' ? (
           <RegistrarAlumno alVolver={() => setVistaAlumnos('consulta')} />
         ) : (
-          <ConsultarAlumnos alNuevoAlumno={() => setVistaAlumnos('registro')} />
+          <ConsultarAlumnos
+            alNuevoAlumno={() => setVistaAlumnos('registro')}
+            alRegistrarTutor={(alumno) => {
+              setAlumnoTutorId(alumno.id)
+              setRegistrandoTutor(true)
+            }}
+            alAbrirExpediente={(alumno) => {
+              setAlumnoTutorId(alumno.id)
+              setMostrandoExpediente(true)
+            }}
+          />
         )
-        )
+        
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones

@@ -14,7 +14,13 @@ const FILTROS_INICIALES: FiltrosAlumno = {
   estado: 'Todos',
 }
 
-export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: () => void }) {
+interface ConsultarAlumnosProps {
+  alNuevoAlumno?: () => void
+  alRegistrarTutor?: (alumno: Alumno) => void
+  alAbrirExpediente?: (alumno: Alumno) => void
+}
+
+export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAbrirExpediente }: ConsultarAlumnosProps) {
   const [alumnos, setAlumnos] = useState<Alumno[]>([])
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)
   const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES)
@@ -144,6 +150,8 @@ export default function ConsultarAlumnos({ alNuevoAlumno }: { alNuevoAlumno?: ()
           alVer={verFicha}
           alEditar={setAlumnoEnEdicion}
           alCambiarEstado={cambiarEstado}
+            alRegistrarTutor={(alumno) => alRegistrarTutor?.(alumno)}
+            alAbrirExpediente={(alumno) => alAbrirExpediente?.(alumno)}
         />
       </section>
 

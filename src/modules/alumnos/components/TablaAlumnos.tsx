@@ -5,6 +5,8 @@ type Propiedades = {
   alVer: (alumno: Alumno) => void
   alEditar: (alumno: Alumno) => void
   alCambiarEstado: (alumno: Alumno) => void
+  alRegistrarTutor: (alumno: Alumno) => void
+  alAbrirExpediente: (alumno: Alumno) => void
 }
 
 export default function TablaAlumnos({
@@ -12,6 +14,8 @@ export default function TablaAlumnos({
   alVer,
   alEditar,
   alCambiarEstado,
+  alRegistrarTutor,
+  alAbrirExpediente,
 }: Propiedades) {
   if (alumnos.length === 0) {
     return (
@@ -91,6 +95,7 @@ export default function TablaAlumnos({
 
                       {alumno.estado !== 'Egresado' && (
                         <button
+                          className="tabla-alumnos__opcion-baja"
                           type="button"
                           onClick={() => alCambiarEstado(alumno)}
                         >
@@ -99,6 +104,13 @@ export default function TablaAlumnos({
                             : 'Reactivar'}
                         </button>
                       )}
+
+                      <button className="tabla-alumnos__opcion-tutor" type="button" onClick={() => alRegistrarTutor(alumno)}>
+                        Registrar tutor
+                      </button>
+                      <button className="tabla-alumnos__opcion-expediente" type="button" onClick={() => alAbrirExpediente(alumno)}>
+                        Expediente digital
+                      </button>
 
                       {alumno.estado === 'Egresado' && (
                         <span className="tabla-alumnos__sin-opciones">

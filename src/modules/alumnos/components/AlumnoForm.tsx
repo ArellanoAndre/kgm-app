@@ -1,5 +1,8 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Alumno } from '../types/Alumno'
+import type { DocumentoAlumno, TipoDocumento } from '../types/documentos'
+import { TIPOS_DOCUMENTO } from '../types/documentos'
+import { urlDocumento } from '../services/documentoService'
 
 type FormErrors = Partial<Record<string, string>>
 
@@ -10,6 +13,12 @@ interface AlumnoFormProps {
   onChange: (alumno: Alumno) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   onCancel: () => void
+  documentos: DocumentoAlumno[]
+  tipoDocumento: TipoDocumento
+  documentoMessage: string | null
+  onTipoDocumentoChange: (tipo: TipoDocumento) => void
+  onArchivoChange: (archivo: File | null) => void
+  onAgregarDocumento: () => void
 }
 
 const inputValue = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -22,6 +31,12 @@ export function AlumnoForm({
   onChange,
   onSubmit,
   onCancel,
+  documentos,
+  tipoDocumento,
+  documentoMessage,
+  onTipoDocumentoChange,
+  onArchivoChange,
+  onAgregarDocumento,
 }: AlumnoFormProps) {
   const update = <K extends keyof Alumno>(key: K, value: Alumno[K]) => {
     onChange({ ...alumno, [key]: value })
@@ -171,15 +186,24 @@ export function AlumnoForm({
         </section>
 
         <section className="alumno-card">
-          <h2>Documentos</h2>
-          {alumno.documentos.length > 0 ? (
+          <div className="documents-panel-heading">
+            <h2>Documentos</h2>
+            <button type="button" className="button button--secondary button--small" onClick={() => document.getElementById('editar-alumno-documento')?.focus()}>
+              + Agregar documento
+            </button>
+          </div>
+          <div className="document-upload document-upload--inline" id="editar-alumno-documento">
+            <label><span>Tipo de documento</span><select value={tipoDocumento} onChange={(event) => onTipoDocumentoChange(event.target.value as TipoDocumento)}>{TIPOS_DOCUMENTO.map((tipo) => <option key={tipo}>{tipo}</option>)}</select></label>
+            <label><span>Archivo PDF, JPG o PNG (máximo 5 MB)</span><input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => onArchivoChange(event.target.files?.[0] ?? null)} /></label>
+            <button className="button button--secondary" type="button" onClick={onAgregarDocumento}>Adjuntar documento</button>
+          </div>
+          {documentoMessage && <p className="form-caption">{documentoMessage}</p>}
+          {documentos.length > 0 ? (
             <div className="document-grid">
-              {alumno.documentos.map((documento) => (
-                <div className="document-item" key={`${documento.tipo}-${documento.nombreArchivo}`}>
+              {documentos.map((documento) => (
+                <div className="document-item" key={documento.id}>
                   <span>{documento.tipo}</span>
-                  <button type="button" className="file-pill" title="El expediente se gestiona desde su módulo correspondiente">
-                    {documento.nombreArchivo}
-                  </button>
+                  <a className="file-pill" href={urlDocumento(documento.id)} target="_blank" rel="noreferrer">{documento.nombreArchivo}</a>
                 </div>
               ))}
             </div>

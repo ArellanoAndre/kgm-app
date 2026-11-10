@@ -3,8 +3,8 @@ import { AlumnoForm } from '../components/AlumnoForm'
 import { actualizarAlumno, obtenerAlumnoPorId } from '../services/alumnoService'
 import type { Alumno, AlumnoEditable } from '../types/Alumno'
 import '../styles/alumnos.css'
-import { listarDocumentos, subirDocumento, urlDocumento } from '../services/documentoService'
-import { TIPOS_DOCUMENTO, type DocumentoAlumno } from '../types/documentos'
+import { listarDocumentos, subirDocumento } from '../services/documentoService'
+import { TIPOS_DOCUMENTO, type DocumentoAlumno, type TipoDocumento } from '../types/documentos'
 
 type FormErrors = Partial<Record<string, string>>
 type FeedbackKind = 'success' | 'info' | 'error'
@@ -54,7 +54,7 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor, onAbr
   const [feedbackKind, setFeedbackKind] = useState<FeedbackKind>('info')
   const [loadError, setLoadError] = useState<string | null>(null)
   const [documentos, setDocumentos] = useState<DocumentoAlumno[]>([])
-  const [tipoDocumento, setTipoDocumento] = useState(TIPOS_DOCUMENTO[0])
+  const [tipoDocumento, setTipoDocumento] = useState<TipoDocumento>(TIPOS_DOCUMENTO[0])
   const [archivo, setArchivo] = useState<File | null>(null)
   const [documentoMessage, setDocumentoMessage] = useState<string | null>(null)
 
@@ -74,14 +74,12 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor, onAbr
     listarDocumentos(alumnoId).then(setDocumentos).catch(() => setDocumentoMessage('No fue posible consultar el expediente.'))
   }, [alumnoId])
 
-  const handleUpload = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleUpload = async () => {
     if (!archivo) return setDocumentoMessage('Selecciona un archivo.')
     try {
       const documento = await subirDocumento(alumnoId, tipoDocumento, archivo)
       setDocumentos((actuales) => [documento, ...actuales])
       setArchivo(null)
-      event.currentTarget.reset()
       setDocumentoMessage('Documento adjuntado correctamente.')
     } catch (error) {
       setDocumentoMessage(error instanceof Error ? error.message : 'No fue posible adjuntar el documento.')
@@ -153,12 +151,12 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor, onAbr
             type="button"
             onClick={() => onAbrirRegistroTutor(alumno.id)}
           >
-            Registrar tutor
+            HU-1.5 · Registrar tutor
           </button>
         )}
         {onAbrirExpediente && (
           <button className="button button--secondary button--top" type="button" onClick={() => onAbrirExpediente(alumno.id)}>
-            Expediente digital
+            HU-1.6 · Expediente digital
           </button>
         )}
       </div>
@@ -175,17 +173,13 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor, onAbr
         }}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        documentos={documentos}
+        tipoDocumento={tipoDocumento}
+        documentoMessage={documentoMessage}
+        onTipoDocumentoChange={setTipoDocumento}
+        onArchivoChange={setArchivo}
+        onAgregarDocumento={handleUpload}
       />
-      <section className="alumno-card expediente-card">
-        <h2>Expediente digital</h2>
-        <form className="document-upload" onSubmit={handleUpload}>
-          <label><span>Tipo de documento</span><select value={tipoDocumento} onChange={(event) => setTipoDocumento(event.target.value as typeof tipoDocumento)}>{TIPOS_DOCUMENTO.map((tipo) => <option key={tipo}>{tipo}</option>)}</select></label>
-          <label><span>Archivo PDF, JPG o PNG (máximo 5 MB)</span><input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => setArchivo(event.target.files?.[0] ?? null)} /></label>
-          <button className="button button--secondary" type="submit">Adjuntar documento</button>
-        </form>
-        {documentoMessage && <p className="form-caption">{documentoMessage}</p>}
-        <div className="document-list">{documentos.map((documento) => <a key={documento.id} href={urlDocumento(documento.id)} target="_blank" rel="noreferrer">{documento.tipo} · {documento.nombreArchivo}</a>)}</div>
-      </section>
     </section>
   )
 }
