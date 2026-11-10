@@ -1,5 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Alumno } from '../types/Alumno'
+import type { DocumentoAlumno } from '../types/documentos'
+import { urlDocumento } from '../services/documentoService'
 
 type FormErrors = Partial<Record<string, string>>
 
@@ -10,6 +12,8 @@ interface AlumnoFormProps {
   onChange: (alumno: Alumno) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   onCancel: () => void
+  documentos: DocumentoAlumno[]
+  onAbrirExpediente?: () => void
 }
 
 const inputValue = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -22,6 +26,8 @@ export function AlumnoForm({
   onChange,
   onSubmit,
   onCancel,
+  documentos,
+  onAbrirExpediente,
 }: AlumnoFormProps) {
   const update = <K extends keyof Alumno>(key: K, value: Alumno[K]) => {
     onChange({ ...alumno, [key]: value })
@@ -171,15 +177,16 @@ export function AlumnoForm({
         </section>
 
         <section className="alumno-card">
-          <h2>Documentos</h2>
-          {alumno.documentos.length > 0 ? (
+          <div className="documents-panel-heading">
+            <h2>Documentos</h2>
+            {onAbrirExpediente && <button type="button" className="button button--secondary button--small" onClick={onAbrirExpediente}>Agregar documento</button>}
+          </div>
+          {documentos.length > 0 ? (
             <div className="document-grid">
-              {alumno.documentos.map((documento) => (
-                <div className="document-item" key={`${documento.tipo}-${documento.nombreArchivo}`}>
+              {documentos.map((documento) => (
+                <div className="document-item" key={documento.id}>
                   <span>{documento.tipo}</span>
-                  <button type="button" className="file-pill" title="El expediente se gestiona desde su módulo correspondiente">
-                    {documento.nombreArchivo}
-                  </button>
+                  <a className="file-pill" href={urlDocumento(documento.id)} target="_blank" rel="noreferrer">{documento.nombreArchivo}</a>
                 </div>
               ))}
             </div>

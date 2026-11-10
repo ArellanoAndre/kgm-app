@@ -4,6 +4,8 @@ import type {
   ModuloId,
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
+import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
+import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
 import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
 import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
@@ -27,6 +29,9 @@ export function App() {
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
     useState<VistaReportes>('inicio')
+  const [registrandoTutor, setRegistrandoTutor] = useState(false)
+  const [alumnoTutorId, setAlumnoTutorId] = useState<number | null>(null)
+  const [mostrandoExpediente, setMostrandoExpediente] = useState(false)
   const [vistaAlumnos, setVistaAlumnos] =
     useState<VistaAlumnos>('consulta')
 
@@ -34,6 +39,9 @@ export function App() {
     setModuloActivo(modulo)
     setVistaAlumnos('consulta')
     setOpcionGestionAcademica(null)
+    setRegistrandoTutor(false)
+    setAlumnoTutorId(null)
+    setMostrandoExpediente(false)
 
     if (modulo === 'reportes') {
       setVistaReportes('inicio')
@@ -58,15 +66,26 @@ export function App() {
           busquedaGlobal={busqueda}
         />
       ) : moduloActivo === 'alumnos' ? (
-        vistaAlumnos === 'registro' ? (
-          <RegistrarAlumno
-            alVolver={() => setVistaAlumnos('consulta')}
-          />
+        mostrandoExpediente ? (
+          <ExpedienteDigital alumnoId={alumnoTutorId ?? 1} onVolver={() => setMostrandoExpediente(false)} />
+        ) : registrandoTutor && alumnoTutorId !== null ? (
+          <RegistrarTutor alumnoId={alumnoTutorId} onCancel={() => setRegistrandoTutor(false)} />
+        ) : vistaAlumnos === 'registro' ? (
+          <RegistrarAlumno alVolver={() => setVistaAlumnos('consulta')} />
         ) : (
           <ConsultarAlumnos
             alNuevoAlumno={() => setVistaAlumnos('registro')}
+            alRegistrarTutor={(alumno) => {
+              setAlumnoTutorId(alumno.id)
+              setRegistrandoTutor(true)
+            }}
+            alAbrirExpediente={(alumno) => {
+              setAlumnoTutorId(alumno.id)
+              setMostrandoExpediente(true)
+            }}
           />
         )
+        
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones

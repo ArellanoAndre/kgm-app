@@ -3,12 +3,15 @@ import { AlumnoForm } from '../components/AlumnoForm'
 import { actualizarAlumno, obtenerAlumnoPorId } from '../services/alumnoService'
 import type { Alumno, AlumnoEditable } from '../types/Alumno'
 import '../styles/alumnos.css'
+import { listarDocumentos } from '../services/documentoService'
+import type { DocumentoAlumno } from '../types/documentos'
 
 type FormErrors = Partial<Record<string, string>>
 type FeedbackKind = 'success' | 'info' | 'error'
 
 interface EditarAlumnoProps {
   alumnoId?: number
+  onAbrirRegistroTutor?: (alumnoId: number) => void
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -40,7 +43,7 @@ function validate(alumno: Alumno): FormErrors {
   return errors
 }
 
-export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
+export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: EditarAlumnoProps) {
   const [alumno, setAlumno] = useState<Alumno | null>(null)
   const [original, setOriginal] = useState<Alumno | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -49,6 +52,7 @@ export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [feedbackKind, setFeedbackKind] = useState<FeedbackKind>('info')
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [documentos, setDocumentos] = useState<DocumentoAlumno[]>([])
 
   useEffect(() => {
     setLoading(true)
@@ -63,7 +67,9 @@ export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
         setLoadError(error instanceof Error ? error.message : 'No fue posible cargar la información del alumno.')
       })
       .finally(() => setLoading(false))
+    listarDocumentos(alumnoId).then(setDocumentos)
   }, [alumnoId])
+
 
   const fullName = useMemo(() => {
     if (!alumno) return ''
@@ -124,6 +130,15 @@ export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
         >
           {saving ? 'Guardando…' : 'Guardar cambios'}
         </button>
+        {onAbrirRegistroTutor && (
+          <button
+            className="button button--secondary button--top"
+            type="button"
+            onClick={() => onAbrirRegistroTutor(alumno.id)}
+          >
+            HU-1.5 · Registrar tutor
+          </button>
+        )}
       </div>
 
       {message && <div className={`feedback-banner feedback-banner--${feedbackKind}`} role="status">{message}</div>}
@@ -138,6 +153,7 @@ export default function EditarAlumno({ alumnoId = 1 }: EditarAlumnoProps) {
         }}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
+        documentos={documentos}
       />
     </section>
   )
