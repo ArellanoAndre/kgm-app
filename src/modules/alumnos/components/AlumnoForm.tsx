@@ -1,7 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Alumno } from '../types/Alumno'
-import type { DocumentoAlumno, TipoDocumento } from '../types/documentos'
-import { TIPOS_DOCUMENTO } from '../types/documentos'
+import type { DocumentoAlumno } from '../types/documentos'
 import { urlDocumento } from '../services/documentoService'
 
 type FormErrors = Partial<Record<string, string>>
@@ -14,11 +13,7 @@ interface AlumnoFormProps {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   onCancel: () => void
   documentos: DocumentoAlumno[]
-  tipoDocumento: TipoDocumento
-  documentoMessage: string | null
-  onTipoDocumentoChange: (tipo: TipoDocumento) => void
-  onArchivoChange: (archivo: File | null) => void
-  onAgregarDocumento: () => void
+  onAbrirExpediente?: () => void
 }
 
 const inputValue = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -32,11 +27,7 @@ export function AlumnoForm({
   onSubmit,
   onCancel,
   documentos,
-  tipoDocumento,
-  documentoMessage,
-  onTipoDocumentoChange,
-  onArchivoChange,
-  onAgregarDocumento,
+  onAbrirExpediente,
 }: AlumnoFormProps) {
   const update = <K extends keyof Alumno>(key: K, value: Alumno[K]) => {
     onChange({ ...alumno, [key]: value })
@@ -188,16 +179,8 @@ export function AlumnoForm({
         <section className="alumno-card">
           <div className="documents-panel-heading">
             <h2>Documentos</h2>
-            <button type="button" className="button button--secondary button--small" onClick={() => document.getElementById('editar-alumno-documento')?.focus()}>
-              + Agregar documento
-            </button>
+            {onAbrirExpediente && <button type="button" className="button button--secondary button--small" onClick={onAbrirExpediente}>Agregar documento</button>}
           </div>
-          <div className="document-upload document-upload--inline" id="editar-alumno-documento">
-            <label><span>Tipo de documento</span><select value={tipoDocumento} onChange={(event) => onTipoDocumentoChange(event.target.value as TipoDocumento)}>{TIPOS_DOCUMENTO.map((tipo) => <option key={tipo}>{tipo}</option>)}</select></label>
-            <label><span>Archivo PDF, JPG o PNG (máximo 5 MB)</span><input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(event) => onArchivoChange(event.target.files?.[0] ?? null)} /></label>
-            <button className="button button--secondary" type="button" onClick={onAgregarDocumento}>Adjuntar documento</button>
-          </div>
-          {documentoMessage && <p className="form-caption">{documentoMessage}</p>}
           {documentos.length > 0 ? (
             <div className="document-grid">
               {documentos.map((documento) => (
