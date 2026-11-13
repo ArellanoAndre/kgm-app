@@ -146,13 +146,14 @@ export default function RegistrarTutor({ alumnoId, onCancel }: RegistrarTutorPro
             ['nombre', 'Nombre(s)', 'Ej. María'],
             ['apellidoPaterno', 'Apellido paterno', 'Ej. López'],
             ['apellidoMaterno', 'Apellido materno', 'Ej. Hernández'],
+            ['curp', 'CURP', 'Ej. ABCD001122HDFRRL01'],
             ['parentesco', 'Parentesco', 'Selecciona una opción'],
             ['telefono', 'Teléfono', 'Ej. 55 1234 5678'],
             ['email', 'Correo electrónico', 'Ej. nombre@correo.com'],
             ['direccion', 'Dirección', 'Ej. Calle de las Flores 18, Col. Centro, C.P. 64000'],
           ] as const).map(([campo, label, placeholder]) => (
             <label className={campo === 'direccion' ? 'tutor-span-3' : ''} key={campo}>
-              <span>{label}{['nombre', 'apellidoPaterno', 'parentesco', 'telefono'].includes(campo) ? ' *' : ''}</span>
+               <span>{label}{['nombre', 'apellidoPaterno', 'curp', 'parentesco', 'telefono'].includes(campo) ? ' *' : ''}</span>
               {campo === 'parentesco' ? (
                 <select value={datos[campo] ?? ''} onChange={(event) => cambiarCampo(campo, event.target.value)}>
                   <option value="">{placeholder}</option>
@@ -180,10 +181,6 @@ export default function RegistrarTutor({ alumnoId, onCancel }: RegistrarTutorPro
             <option>Sí</option>
           </select>
         </label>
-        <div className="tutor-note">
-          <strong>ⓘ Evita duplicados</strong>
-          <span>Antes de registrar un nuevo tutor, busca primero si el contacto ya existe en la base para mantener la información consistente.</span>
-        </div>
         <div className="tutor-actions">
           <span>Puedes asociar varios tutores al alumno.</span>
           <div>
