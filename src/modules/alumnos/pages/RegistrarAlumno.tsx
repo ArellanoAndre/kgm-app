@@ -1,6 +1,8 @@
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:3000'
 import { useEffect, useState, type FormEvent } from 'react'
 import '../styles/alumnos.css'
+import { crearTutor, consultarTutores } from '../services/tutorService'
+import type { Tutor } from '../types/Tutor'
 
 type Props = {
   alVolver: () => void
@@ -13,6 +15,7 @@ type DatosAlumno = {
   apellidoMaterno: string
   curp: string
   fechaNacimiento: string
+  nacionalidad: string
   genero: string
   telefono: string
   correo: string
@@ -33,6 +36,7 @@ const INICIALES: DatosAlumno = {
   apellidoMaterno: '',
   curp: '',
   fechaNacimiento: '',
+  nacionalidad: 'Mexicana',
   genero: '',
   telefono: '',
   correo: '',
@@ -79,37 +83,129 @@ export default function RegistrarAlumno({ alVolver }: Props) {
   const [datos, setDatos] = useState<DatosAlumno>(INICIALES)
   const [error, setError] = useState('')
   const [finalizado, setFinalizado] = useState(false)
+  const [tutores, setTutores] = useState<Tutor[]>([])
+  const [tutorId, setTutorId] = useState<number | null>(null)
+  const [busquedaTutor, setBusquedaTutor] = useState('')
+  const [creandoTutor, setCreandoTutor] = useState(false)
+  const [guardandoTutor, setGuardandoTutor] = useState(false)
+  const [nuevoTutor, setNuevoTutor] = useState({
+    nombre: '', apellidoPaterno: '', apellidoMaterno: '',
+    curp: '', telefono: '', email: '', parentesco: '', direccion: '',
+  })
+
+  useEffect(() => {
+    consultarTutores().then(setTutores)
+      .catch(() => setError('No fue posible cargar los tutores.'))
+  }, [])
+
+  function seleccionarTutor(tutor: Tutor) {
+    setTutorId(tutor.id)
+    setDatos((actuales) => ({
+      ...actuales,
+      tutorNombre: [tutor.nombre, tutor.apellidoPaterno, tutor.apellidoMaterno]
+        .filter(Boolean).join(' '),
+      tutorParentesco: tutor.parentesco,
+      tutorTelefono: tutor.telefono,
+    }))
+    setCreandoTutor(false)
+    setError('')
+  }
+
+  async function registrarTutorNuevo() {
+    if (!nuevoTutor.nombre.trim() || !nuevoTutor.apellidoPaterno.trim() ||
+        !/^[A-Z0-9]{18}$/.test(nuevoTutor.curp.trim().toUpperCase()) ||
+        !/^\d{10}$/.test(nuevoTutor.telefono.trim()) ||
+        !nuevoTutor.parentesco.trim()) {
+      setError('Completa nombre, apellido, CURP de 18 caracteres, telefono de 10 digitos y parentesco.')
+      return
+    }
+    if (nuevoTutor.email.trim() &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nuevoTutor.email.trim())) {
+      setError('Ingresa un correo electronico valido.')
+      return
+    }
+    setGuardandoTutor(true)
+    setError('')
+    try {
+      const tutor = await crearTutor({
+        ...nuevoTutor,
+        curp: nuevoTutor.curp.trim().toUpperCase(),
+        email: nuevoTutor.email.trim().toLowerCase(),
+      })
+      setTutores((actuales) => [...actuales, tutor])
+      seleccionarTutor(tutor)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo registrar el tutor.')
+    } finally {
+      setGuardandoTutor(false)
+    }
+  }
 
   function actualizar(campo: keyof DatosAlumno, valor: string) {
     setDatos((actuales) => ({ ...actuales, [campo]: valor }))
     setError('')
   }
 
-  function siguiente() {
-    if (paso === 0) {
-      if (!datos.matricula.trim() || !datos.nombre.trim() || !datos.apellidoPaterno.trim() ||
-          !datos.curp.trim() || !datos.fechaNacimiento) {
-        setError('Completa nombre, apellido paterno, CURP y fecha de nacimiento.')
-        return
+  function validarPasoRegistro(numeroPaso: number): string | null {
+    if (numeroPaso === 0) {
+      if (!datos.matricula.trim() || !datos.nombre.trim() ||
+          !datos.apellidoPaterno.trim() || !datos.curp.trim() ||
+          !datos.fechaNacimiento) {
+        return 'Completa matricula, nombre, apellido paterno, CURP y fecha de nacimiento.'
       }
 
       if (!/^[A-Z0-9]{18}$/.test(datos.curp.trim().toUpperCase())) {
-        setError('La CURP debe tener 18 caracteres alfanuméricos.')
-        return
+        return 'La CURP debe tener 18 caracteres alfanumericos.'
+      }
+
+      const fecha = datos.fechaNacimiento
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+        return 'Ingresa una fecha de nacimiento valida.'
+      }
+      const [anio, mes, dia] = fecha.split('-').map(Number)
+      const fechaComprobada = new Date(Date.UTC(anio, mes - 1, dia))
+      const hoy = new Date()
+      const hoyUTC = Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+      if (anio < 1900 || fechaComprobada.getUTCFullYear() !== anio ||
+          fechaComprobada.getUTCMonth() !== mes - 1 ||
+          fechaComprobada.getUTCDate() !== dia ||
+          fechaComprobada.getTime() > hoyUTC) {
+        return 'La fecha de nacimiento debe ser real, no futura y posterior a 1899.'
+      }
+
+      if (datos.correo.trim() &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo.trim())) {
+        return 'Ingresa un correo electronico valido.'
+      }
+      if (datos.telefono.trim() && !/^\d{10}$/.test(datos.telefono.trim())) {
+        return 'El telefono del alumno debe contener 10 digitos.'
       }
     }
 
-    if (paso === 1 && (!datos.grado || !datos.grupo || !datos.turno)) {
-      setError('Selecciona grado, grupo y turno.')
-      return
+    if (numeroPaso === 1) {
+      if (!datos.grado || !datos.grupo || !datos.turno) {
+        return 'Selecciona grado, grupo y turno.'
+      }
+      const grado = opciones.grados.find((item) => item.nombre === datos.grado)
+      const grupoValido = opciones.grupos.some((item) =>
+        item.gradoId === grado?.id && item.nombre === datos.grupo)
+      if (!grado || !grupoValido || !['Matutino', 'Vespertino'].includes(datos.turno)) {
+        return 'Selecciona un grado, grupo y turno validos.'
+      }
     }
 
-    if (paso === 2 && (!datos.tutorNombre.trim() ||
-        !datos.tutorParentesco || !datos.tutorTelefono.trim())) {
-      setError('Completa los datos obligatorios del tutor.')
+    if (numeroPaso === 2 && tutorId === null) {
+      return 'Selecciona o registra un tutor antes de continuar.'
+    }
+    return null
+  }
+
+  function siguiente() {
+    const mensaje = validarPasoRegistro(paso)
+    if (mensaje) {
+      setError(mensaje)
       return
     }
-
     setError('')
     setPaso((actual) => Math.min(actual + 1, PASOS.length - 1))
   }
@@ -120,6 +216,15 @@ export default function RegistrarAlumno({ alVolver }: Props) {
     if (paso !== PASOS.length - 1) {
       siguiente()
       return
+    }
+
+    for (const numeroPaso of [0, 1, 2]) {
+      const mensaje = validarPasoRegistro(numeroPaso)
+      if (mensaje) {
+        setError(mensaje)
+        setPaso(numeroPaso)
+        return
+      }
     }
 
     const gradoSeleccionado = opciones.grados.find(
@@ -148,6 +253,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
         },
         body: JSON.stringify({
           escuelaId: 1,
+          tutorId,
           grupoId: grupoSeleccionado.id,
           cicloId: cicloSeleccionado.id,
           matricula: datos.matricula.trim(),
@@ -156,6 +262,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
           apellidoPaterno: datos.apellidoPaterno.trim(),
           apellidoMaterno: datos.apellidoMaterno.trim(),
           fechaNacimiento: datos.fechaNacimiento,
+          nacionalidad: datos.nacionalidad.trim(),
           genero: datos.genero || undefined,
           telefono: datos.telefono || undefined,
           correo: datos.correo || undefined,
@@ -210,9 +317,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
 
           <h2>El alumno fue registrado correctamente</h2>
           <p className="registro-confirmacion-descripcion">
-            Se completó correctamente el formulario de registro.
-            Esta es una demostración del frontend y todavía no
-            se ha guardado información en el servidor.
+            El alumno y su tutor quedaron registrados y asociados en el sistema.
           </p>
 
           <div className="registro-confirmacion-contenido">
@@ -279,6 +384,10 @@ export default function RegistrarAlumno({ alVolver }: Props) {
                 type="button"
                 className="registro-secundario"
                 onClick={() => {
+                  setTutorId(null)
+                  setBusquedaTutor('')
+                  setCreandoTutor(false)
+                  setNuevoTutor({ nombre: '', apellidoPaterno: '', apellidoMaterno: '', curp: '', telefono: '', email: '', parentesco: '', direccion: '' })
                   setDatos(INICIALES)
                   setPaso(0)
                   setError('')
@@ -338,7 +447,29 @@ export default function RegistrarAlumno({ alVolver }: Props) {
             {campo('Apellido paterno', 'apellidoPaterno', 'text', true)}
             {campo('Apellido materno', 'apellidoMaterno')}
             {campo('CURP', 'curp', 'text', true)}
-            {campo('Fecha de nacimiento', 'fechaNacimiento', 'date', true)}
+            <label className="registro-campo">
+              <span>Fecha de nacimiento *</span>
+              <input
+                type="date"
+                required
+                min="1900-01-01"
+                max={new Date().toLocaleDateString('sv-SE')}
+                value={datos.fechaNacimiento}
+                onChange={(e) => actualizar('fechaNacimiento', e.target.value)}
+              />
+            </label>
+            <label className="registro-campo">
+              <span>Nacionalidad *</span>
+              <select
+                value={datos.nacionalidad}
+                onChange={(e) => actualizar('nacionalidad', e.target.value)}
+              >
+                <option value="">Seleccionar nacionalidad</option>
+                <option value="Mexicana">Mexicana</option>
+                <option value="Estadounidense">Estadounidense</option>
+                <option value="Otra">Otra</option>
+              </select>
+            </label>
             <label className="registro-campo">
               <span>Género</span>
               <select value={datos.genero}
@@ -395,20 +526,75 @@ export default function RegistrarAlumno({ alVolver }: Props) {
         )}
 
         {paso === 2 && (
-          <div className="registro-grid">
-            {campo('Nombre completo del tutor', 'tutorNombre', 'text', true)}
+          <div>
+            <p>Selecciona un tutor registrado o crea uno nuevo.</p>
             <label className="registro-campo">
-              <span>Parentesco *</span>
-              <select value={datos.tutorParentesco}
-                onChange={(e) => actualizar('tutorParentesco', e.target.value)}>
-                <option value="">Seleccionar parentesco</option>
-                <option>Madre</option>
-                <option>Padre</option>
-                <option>Abuelo/a</option>
-                <option>Otro</option>
-              </select>
+              <span>Buscar tutor existente</span>
+              <input type="search" placeholder="Nombre, apellido o CURP"
+                value={busquedaTutor}
+                onChange={(e) => setBusquedaTutor(e.target.value)} />
             </label>
-            {campo('Teléfono del tutor', 'tutorTelefono', 'tel', true)}
+            <div style={{ maxHeight: 210, overflowY: 'auto', marginTop: 12 }}>
+              {tutores.filter((t) =>
+                [t.nombre, t.apellidoPaterno, t.apellidoMaterno ?? '', t.curp]
+                  .join(' ').toLowerCase()
+                  .includes(busquedaTutor.trim().toLowerCase())
+              ).map((t) => (
+                <label key={t.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: 10, cursor: 'pointer'
+                }}>
+                  <input type="radio" name="tutorSeleccionado"
+                    checked={tutorId === t.id}
+                    onChange={() => seleccionarTutor(t)} />
+                  <span>{t.nombre} {t.apellidoPaterno} {t.apellidoMaterno ?? ''}
+                    {' - '}{t.parentesco} / {t.telefono}</span>
+                </label>
+              ))}
+            </div>
+            {tutorId !== null && (
+              <p><strong>Tutor seleccionado:</strong> {datos.tutorNombre}</p>
+            )}
+            <button type="button" className="registro-secundario"
+              onClick={() => { setCreandoTutor((actual) => !actual); setError('') }}>
+              {creandoTutor ? 'Cancelar nuevo tutor' : '+ Registrar tutor nuevo'}
+            </button>
+            {creandoTutor && (
+              <div className="registro-grid" style={{ marginTop: 16 }}>
+                {([
+                  ['nombre', 'Nombre(s)'],
+                  ['apellidoPaterno', 'Apellido paterno'],
+                  ['apellidoMaterno', 'Apellido materno'],
+                  ['curp', 'CURP'],
+                  ['telefono', 'Telefono'],
+                  ['email', 'Correo electronico'],
+                  ['direccion', 'Direccion'],
+                ] as const).map(([clave, etiqueta]) => (
+                  <label className="registro-campo" key={clave}>
+                    <span>{etiqueta}</span>
+                    <input value={nuevoTutor[clave]}
+                      onChange={(e) => setNuevoTutor((actual) => ({
+                        ...actual, [clave]: e.target.value
+                      }))} />
+                  </label>
+                ))}
+                <label className="registro-campo">
+                  <span>Parentesco *</span>
+                  <select value={nuevoTutor.parentesco}
+                    onChange={(e) => setNuevoTutor((actual) => ({
+                      ...actual, parentesco: e.target.value
+                    }))}>
+                    <option value="">Seleccionar</option>
+                    <option>Madre</option><option>Padre</option>
+                    <option>Tutor legal</option><option>Otro</option>
+                  </select>
+                </label>
+                <button type="button" className="boton-primario-alumnos"
+                  disabled={guardandoTutor} onClick={registrarTutorNuevo}>
+                  {guardandoTutor ? 'Guardando...' : 'Guardar y seleccionar tutor'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 

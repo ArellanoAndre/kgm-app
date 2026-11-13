@@ -1,4 +1,5 @@
-﻿import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
+﻿import { useState } from 'react'
+import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 
 type Propiedades = {
   alumnos: Alumno[]
@@ -17,6 +18,8 @@ export default function TablaAlumnos({
   alRegistrarTutor,
   alAbrirExpediente,
 }: Propiedades) {
+  const [opcionesAbiertasId, setOpcionesAbiertasId] = useState<Alumno['id'] | null>(null)
+
   if (alumnos.length === 0) {
     return (
       <p className="tabla-alumnos__vacio">
@@ -90,7 +93,19 @@ export default function TablaAlumnos({
                       Editar
                     </button>
 
-                    <details className="tabla-alumnos__mas-opciones">
+                    <details
+                      className="tabla-alumnos__mas-opciones"
+                      open={opcionesAbiertasId === alumno.id}
+                      onToggle={(evento) => {
+                        if (evento.currentTarget.open) {
+                          setOpcionesAbiertasId(alumno.id)
+                        } else {
+                          setOpcionesAbiertasId((actual) =>
+                            actual === alumno.id ? null : actual
+                          )
+                        }
+                      }}
+                    >
                       <summary>Más opciones</summary>
 
                       {alumno.estado !== 'Egresado' && (
