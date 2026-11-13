@@ -22,6 +22,15 @@ export async function subirDocumento(alumnoId: number, tipo: string, archivo: Fi
   return (await response.json()) as DocumentoAlumno
 }
 
+export async function eliminarDocumento(id: number): Promise<void> {
+  const response = await fetch(`${API_URL}/documentos/${id}?escuelaId=${ESCUELA_ID}`, { method: 'DELETE' })
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { message?: string | string[] } | null
+    const message = Array.isArray(body?.message) ? body.message.join(' ') : body?.message
+    throw new Error(message ?? `No fue posible eliminar el documento (HTTP ${response.status}).`)
+  }
+}
+
 export function urlDocumento(id: number): string {
   return `${API_URL}/documentos/${id}/contenido?escuelaId=${ESCUELA_ID}`
 }
