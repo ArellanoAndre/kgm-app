@@ -1,0 +1,432 @@
+.asignaciones-estado {
+  margin: 0;
+  padding: 28px 24px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
+.asignaciones-tabla__vacia {
+  padding: 28px 24px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.action-link:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.action-link:disabled:hover {
+  text-decoration: none;
+}
+
+.asignaciones-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+.asignaciones-mensaje span {
+  flex: 1;
+  min-width: 0;
+}
+
+.asignaciones-mensaje strong {
+  font-size: 13px;
+}
+
+.asignaciones-mensaje button {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.asignaciones-mensaje--exito {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.asignaciones-mensaje--error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.asignaciones-filtros {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.asignaciones-filtros__fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.asignaciones-filtros__fila .input-search {
+  flex: 1 1 280px;
+}
+
+.asignaciones-filtros__fila .select-filter {
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.asignacion-docente {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.asignacion-docente__foto,
+.asignacion-docente__foto-vacia {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 9999px;
+}
+
+.asignacion-docente__foto {
+  object-fit: cover;
+}
+
+.asignacion-docente__foto-vacia {
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.asignacion-docente__datos,
+.asignacion-docente-seleccionado__datos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.asignacion-docente__nombre {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.asignacion-docente__curp {
+  margin-top: 2px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.asignaciones-dialogo__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(17 24 39 / 35%);
+}
+
+.asignaciones-dialogo {
+  position: relative;
+  width: min(100%, 640px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 28px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgb(17 24 39 / 18%);
+}
+
+.asignaciones-dialogo h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 20px;
+}
+
+.asignaciones-dialogo__descripcion {
+  margin: 4px 0 20px;
+  padding-right: 24px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.asignaciones-dialogo__cerrar {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  padding: 0;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 0;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.asignaciones-dialogo__cerrar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.asignaciones-formulario__rejilla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+
+.asignaciones-formulario__rejilla .form-group {
+  margin-bottom: 14px;
+}
+
+.asignaciones-formulario__ayuda {
+  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.asignaciones-formulario__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.asignaciones-formulario__cancelar {
+  min-height: 38px;
+  padding: 8px 16px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.asignaciones-formulario__cancelar:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.asignaciones-formulario__cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.asignaciones-formulario__cancelar:focus-visible,
+.asignaciones-dialogo__cerrar:focus-visible,
+.asignaciones-enlace:focus-visible,
+.asignaciones-buscador__opcion:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.asignaciones-buscador {
+  position: relative;
+}
+
+.asignaciones-buscador__resultados {
+  margin-top: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.asignaciones-buscador__opcion {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.asignaciones-buscador__opcion:last-child {
+  border-bottom: 0;
+}
+
+.asignaciones-buscador__opcion:hover {
+  background: #f8fafc;
+}
+
+.asignaciones-buscador__opcion strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.asignaciones-buscador__opcion span {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.asignaciones-buscador__vacio {
+  margin: 0;
+  padding: 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.asignacion-docente-seleccionado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.asignacion-docente-seleccionado__datos {
+  flex: 1;
+}
+
+.asignacion-docente-seleccionado__datos strong {
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.asignacion-docente-seleccionado__datos span {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.asignaciones-enlace {
+  padding: 4px 8px;
+  color: #2563eb;
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.asignaciones-enlace:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.asignaciones-enlace:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.asignaciones-detalle {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.asignaciones-detalle__docente {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.asignaciones-detalle__foto,
+.asignaciones-detalle__foto-vacia {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 9999px;
+}
+
+.asignaciones-detalle__foto {
+  object-fit: cover;
+}
+
+.asignaciones-detalle__foto-vacia {
+  display: grid;
+  place-items: center;
+  color: #2563eb;
+  background: #eff6ff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.asignaciones-detalle__docente strong {
+  display: block;
+  color: #0f172a;
+  font-size: 15px;
+}
+
+.asignaciones-detalle__docente span {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.asignaciones-detalle__datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.asignaciones-detalle__dato {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.asignaciones-detalle__dato dt {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.asignaciones-detalle__dato dd {
+  margin: 0;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .asignaciones-filtros__fila .select-filter {
+    flex: 1 1 100%;
+  }
+
+  .asignaciones-formulario__rejilla,
+  .asignaciones-detalle__datos {
+    grid-template-columns: 1fr;
+  }
+
+  .asignaciones-dialogo {
+    padding: 22px 18px;
+  }
+}
