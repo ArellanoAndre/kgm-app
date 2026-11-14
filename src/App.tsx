@@ -12,6 +12,7 @@ import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
 import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
+import { GestionAsignacionesAcademicas } from './modules/gestion-academica/pages/GestionAsignacionesAcademicas'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import './App.css'
@@ -106,6 +107,9 @@ export function App() {
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'materias' ? (
         <GestionMaterias />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'asignar-docente-grupo-materia' ? (
+        <GestionAsignacionesAcademicas />
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica ? (
         <section
