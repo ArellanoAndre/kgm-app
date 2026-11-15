@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import {
   MODULOS_BARRA_LATERAL,
+  OPCIONES_ALUMNOS,
   OPCIONES_GESTION_ACADEMICA,
   type ModuloId,
+  type OpcionAlumnosId,
   type OpcionGestionAcademicaId,
 } from './modulosBarraLateral'
 import './BarraLateral.css'
@@ -10,6 +12,8 @@ import './BarraLateral.css'
 type PropiedadesBarraLateral = {
   moduloActivo: ModuloId
   alCambiarModulo: (modulo: ModuloId) => void
+  opcionAlumnosActiva: OpcionAlumnosId | null
+  alCambiarOpcionAlumnos: (opcion: OpcionAlumnosId) => void
   opcionGestionAcademicaActiva: OpcionGestionAcademicaId | null
   alCambiarOpcionGestionAcademica: (opcion: OpcionGestionAcademicaId) => void
 }
@@ -58,19 +62,43 @@ function IconoModulo({ nombre }: { nombre: (typeof MODULOS_BARRA_LATERAL)[number
   )
 }
 
+function FlechaSubmenu({ abierta }: { abierta: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`barra-lateral__flecha${abierta ? ' barra-lateral__flecha--abierta' : ''}`}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}
+
 function BarraLateral({
   moduloActivo,
   alCambiarModulo,
+  opcionAlumnosActiva,
+  alCambiarOpcionAlumnos,
   opcionGestionAcademicaActiva,
   alCambiarOpcionGestionAcademica,
 }: PropiedadesBarraLateral) {
+  const [alumnosAbierto, setAlumnosAbierto] = useState(
+    moduloActivo === 'alumnos' || opcionAlumnosActiva !== null,
+  )
   const [gestionAcademicaAbierta, setGestionAcademicaAbierta] = useState(
     moduloActivo === 'gestion-academica' || opcionGestionAcademicaActiva !== null,
   )
 
+  const haySubmenuAbierto = alumnosAbierto || gestionAcademicaAbierta
+
   return (
     <aside
-      className={`barra-lateral${gestionAcademicaAbierta ? ' barra-lateral--gestion-abierta' : ''}`}
+      className={`barra-lateral${haySubmenuAbierto ? ' barra-lateral--submenu-abierto' : ''}`}
     >
       <a aria-label="Escuela, inicio" className="barra-lateral__marca" href="/">
         <span aria-hidden="true" className="barra-lateral__icono-marca">
@@ -91,27 +119,42 @@ function BarraLateral({
         <p className="barra-lateral__etiqueta-seccion">Módulos</p>
         <ul className="barra-lateral__lista-modulos">
           {MODULOS_BARRA_LATERAL.map((modulo) => {
+            const esAlumnos = modulo.id === 'alumnos'
             const esGestionAcademica = modulo.id === 'gestion-academica'
+            const tieneSubmenu = esAlumnos || esGestionAcademica
+            const submenuAbierto = esAlumnos
+              ? alumnosAbierto
+              : esGestionAcademica
+                ? gestionAcademicaAbierta
+                : false
 
             return (
               <li key={modulo.id}>
                 <button
                   aria-current={
-                    moduloActivo === modulo.id && !opcionGestionAcademicaActiva
+                    moduloActivo === modulo.id &&
+                    !(esAlumnos ? opcionAlumnosActiva : opcionGestionAcademicaActiva)
                       ? 'page'
                       : undefined
                   }
-                  aria-expanded={
-                    esGestionAcademica ? gestionAcademicaAbierta : undefined
-                  }
+                  aria-expanded={tieneSubmenu ? submenuAbierto : undefined}
                   className={`barra-lateral__modulo${moduloActivo === modulo.id ? ' barra-lateral__modulo--activo' : ''}`}
                   onClick={() => {
-                    if (esGestionAcademica) {
-                      alCambiarModulo(modulo.id)
-                      setGestionAcademicaAbierta((abierta) => !abierta)
+                    if (esAlumnos) {
+                      alCambiarModulo('alumnos')
+                      setAlumnosAbierto((abierta) => !abierta)
+                      setGestionAcademicaAbierta(false)
                       return
                     }
 
+                    if (esGestionAcademica) {
+                      alCambiarModulo('gestion-academica')
+                      setGestionAcademicaAbierta((abierta) => !abierta)
+                      setAlumnosAbierto(false)
+                      return
+                    }
+
+                    setAlumnosAbierto(false)
                     setGestionAcademicaAbierta(false)
                     alCambiarModulo(modulo.id)
                   }}
@@ -120,21 +163,34 @@ function BarraLateral({
                 >
                   <IconoModulo nombre={modulo.icono} />
                   <span>{modulo.nombre}</span>
-                  {esGestionAcademica && (
-                    <svg
-                      aria-hidden="true"
-                      className={`barra-lateral__flecha${gestionAcademicaAbierta ? ' barra-lateral__flecha--abierta' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  )}
+                  {tieneSubmenu && <FlechaSubmenu abierta={submenuAbierto} />}
                 </button>
+
+                {esAlumnos && alumnosAbierto && (
+                  <ul
+                    aria-label="Opciones de Alumnos"
+                    className="barra-lateral__lista-opciones"
+                  >
+                    {OPCIONES_ALUMNOS.map((opcion) => (
+                      <li key={opcion.id}>
+                        <button
+                          aria-current={
+                            opcionAlumnosActiva === opcion.id ? 'page' : undefined
+                          }
+                          className={`barra-lateral__opcion${opcionAlumnosActiva === opcion.id ? ' barra-lateral__opcion--activa' : ''}`}
+                          onClick={() => {
+                            alCambiarModulo('alumnos')
+                            alCambiarOpcionAlumnos(opcion.id)
+                          }}
+                          type="button"
+                        >
+                          {opcion.nombre}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
                 {esGestionAcademica && gestionAcademicaAbierta && (
                   <ul
                     aria-label="Opciones de Gestión académica"

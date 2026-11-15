@@ -1,4 +1,6 @@
-﻿import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
+import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
+
+export type ModoAccionAlumnos = 'completo' | 'editar' | 'tutor' | 'expediente'
 
 type Propiedades = {
   alumnos: Alumno[]
@@ -7,6 +9,7 @@ type Propiedades = {
   alCambiarEstado: (alumno: Alumno) => void
   alRegistrarTutor: (alumno: Alumno) => void
   alAbrirExpediente: (alumno: Alumno) => void
+  modoAccion?: ModoAccionAlumnos
 }
 
 export default function TablaAlumnos({
@@ -16,6 +19,7 @@ export default function TablaAlumnos({
   alCambiarEstado,
   alRegistrarTutor,
   alAbrirExpediente,
+  modoAccion = 'completo',
 }: Propiedades) {
   if (alumnos.length === 0) {
     return (
@@ -48,7 +52,6 @@ export default function TablaAlumnos({
             ].filter(Boolean).join(' ')
 
             const tutor = alumno.tutores.find((item) => item.esPrincipal)
-
             const nombreTutor = tutor
               ? `${tutor.parentesco}: ${[
                   tutor.nombre,
@@ -82,42 +85,66 @@ export default function TablaAlumnos({
 
                 <td>
                   <div className="tabla-alumnos__acciones">
-                    <button type="button" onClick={() => alVer(alumno)}>
-                      Ver
-                    </button>
-
-                    <button type="button" onClick={() => alEditar(alumno)}>
-                      Editar
-                    </button>
-
-                    <details className="tabla-alumnos__mas-opciones">
-                      <summary>Más opciones</summary>
-
-                      {alumno.estado !== 'Egresado' && (
-                        <button
-                          className="tabla-alumnos__opcion-baja"
-                          type="button"
-                          onClick={() => alCambiarEstado(alumno)}
-                        >
-                          {alumno.estado === 'Activo'
-                            ? 'Dar de baja'
-                            : 'Reactivar'}
-                        </button>
-                      )}
-
-                      <button className="tabla-alumnos__opcion-tutor" type="button" onClick={() => alRegistrarTutor(alumno)}>
+                    {modoAccion === 'editar' ? (
+                      <button type="button" onClick={() => alEditar(alumno)}>
+                        Editar
+                      </button>
+                    ) : modoAccion === 'tutor' ? (
+                      <button type="button" onClick={() => alRegistrarTutor(alumno)}>
                         Registrar tutor
                       </button>
-                      <button className="tabla-alumnos__opcion-expediente" type="button" onClick={() => alAbrirExpediente(alumno)}>
+                    ) : modoAccion === 'expediente' ? (
+                      <button type="button" onClick={() => alAbrirExpediente(alumno)}>
                         Expediente digital
                       </button>
+                    ) : (
+                      <>
+                        <button type="button" onClick={() => alVer(alumno)}>
+                          Ver
+                        </button>
 
-                      {alumno.estado === 'Egresado' && (
-                        <span className="tabla-alumnos__sin-opciones">
-                          Sin acciones disponibles
-                        </span>
-                      )}
-                    </details>
+                        <button type="button" onClick={() => alEditar(alumno)}>
+                          Editar
+                        </button>
+
+                        <details className="tabla-alumnos__mas-opciones">
+                          <summary>Más opciones</summary>
+
+                          {alumno.estado !== 'Egresado' && (
+                            <button
+                              className="tabla-alumnos__opcion-baja"
+                              type="button"
+                              onClick={() => alCambiarEstado(alumno)}
+                            >
+                              {alumno.estado === 'Activo'
+                                ? 'Dar de baja'
+                                : 'Reactivar'}
+                            </button>
+                          )}
+
+                          <button
+                            className="tabla-alumnos__opcion-tutor"
+                            type="button"
+                            onClick={() => alRegistrarTutor(alumno)}
+                          >
+                            Registrar tutor
+                          </button>
+                          <button
+                            className="tabla-alumnos__opcion-expediente"
+                            type="button"
+                            onClick={() => alAbrirExpediente(alumno)}
+                          >
+                            Expediente digital
+                          </button>
+
+                          {alumno.estado === 'Egresado' && (
+                            <span className="tabla-alumnos__sin-opciones">
+                              Sin acciones disponibles
+                            </span>
+                          )}
+                        </details>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -128,4 +155,3 @@ export default function TablaAlumnos({
     </div>
   )
 }
-
