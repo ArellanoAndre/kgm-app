@@ -10,7 +10,7 @@ export const FormularioNuevoCiclo: React.FC<Props> = ({ onCrearCiclo, alCancelar
   const [nombre, setNombre] = useState('');
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
-  const [estado, setEstado] = useState<EstadoCiclo>('Programado');
+  const [estado] = useState<EstadoCiclo>('Programado');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
