@@ -12,6 +12,7 @@ import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
+import { GestionGradosGrupos } from './modules/gestion-academica/pages/GestionGradosGrupos'
 import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
 import { GestionAsignacionesAcademicas } from './modules/gestion-academica/pages/GestionAsignacionesAcademicas'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
@@ -36,7 +37,7 @@ export function App() {
     useState<OpcionAlumnosId | null>(null)
 
   const [opcionGestionAcademica, setOpcionGestionAcademica] =
-    useState<OpcionGestionAcademicaId | null>(null)
+    useState<OpcionGestionAcademicaId | null>('grados-grupos')
 
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
@@ -132,6 +133,9 @@ export function App() {
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'ciclos-escolares' ? (
         <GestionCiclosEscolares />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'grados-grupos' ? (
+        <GestionGradosGrupos />
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'materias' ? (
         <GestionMaterias />
