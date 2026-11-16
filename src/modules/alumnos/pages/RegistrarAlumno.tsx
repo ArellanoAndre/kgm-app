@@ -63,6 +63,14 @@ const PASOS = [
   'Confirmación',
 ]
 
+function fechaLimiteEdad(edad: number): string {
+  const hoy = new Date()
+  const limite = new Date(hoy.getFullYear() - edad, hoy.getMonth(), hoy.getDate())
+  const anio = limite.getFullYear()
+  const mes = String(limite.getMonth() + 1).padStart(2, '0')
+  const dia = String(limite.getDate()).padStart(2, '0')
+  return `${anio}-${mes}-${dia}`
+}
 export default function RegistrarAlumno({ alVolver }: Props) {
   const [opciones, setOpciones] = useState<OpcionesEscolares>({
     ciclos: [],
@@ -88,6 +96,8 @@ export default function RegistrarAlumno({ alVolver }: Props) {
   const [busquedaTutor, setBusquedaTutor] = useState('')
   const [creandoTutor, setCreandoTutor] = useState(false)
   const [guardandoTutor, setGuardandoTutor] = useState(false)
+  const [modalConfirmacion, setModalConfirmacion] = useState(false)
+  const [guardandoAlumno, setGuardandoAlumno] = useState(false)
   const [nuevoTutor, setNuevoTutor] = useState({
     nombre: '', apellidoPaterno: '', apellidoMaterno: '',
     curp: '', telefono: '', email: '', parentesco: '', direccion: '',
@@ -97,6 +107,19 @@ export default function RegistrarAlumno({ alVolver }: Props) {
     consultarTutores().then(setTutores)
       .catch(() => setError('No fue posible cargar los tutores.'))
   }, [])
+
+  function cambiarModoTutor(nuevoModo: 'existente' | 'nuevo') {
+    setCreandoTutor(nuevoModo === 'nuevo')
+    setTutorId(null)
+    setBusquedaTutor('')
+    setDatos((actuales) => ({
+      ...actuales,
+      tutorNombre: '',
+      tutorParentesco: '',
+      tutorTelefono: '',
+    }))
+    setError('')
+  }
 
   function seleccionarTutor(tutor: Tutor) {
     setTutorId(tutor.id)
@@ -173,6 +196,12 @@ export default function RegistrarAlumno({ alVolver }: Props) {
         return 'La fecha de nacimiento debe ser real, no futura y posterior a 1899.'
       }
 
+      const fechaMinima = fechaLimiteEdad(18)
+      const fechaMaxima = fechaLimiteEdad(3)
+
+      if (fecha < fechaMinima || fecha > fechaMaxima) {
+        return 'El alumno debe tener entre 3 y 18 años cumplidos.'
+      }
       if (datos.correo.trim() &&
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.correo.trim())) {
         return 'Ingresa un correo electronico valido.'
@@ -194,7 +223,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
       }
     }
 
-    if (numeroPaso === 2 && tutorId === null) {
+    if (numeroPaso === 2 && (tutorId === null || creandoTutor)) {
       return 'Selecciona o registra un tutor antes de continuar.'
     }
     return null
@@ -212,6 +241,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
+    if (guardandoAlumno) return
 
     if (paso !== PASOS.length - 1) {
       siguiente()
@@ -225,6 +255,11 @@ export default function RegistrarAlumno({ alVolver }: Props) {
         setPaso(numeroPaso)
         return
       }
+    }
+
+    if (!modalConfirmacion) {
+      setModalConfirmacion(true)
+      return
     }
 
     const gradoSeleccionado = opciones.grados.find(
@@ -244,6 +279,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
       return
     }
     setError('')
+    setGuardandoAlumno(true)
 
     try {
       const respuesta = await fetch(`${API_URL}/alumnos`, {
@@ -278,6 +314,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
         throw new Error(`No se pudo registrar el alumno (HTTP ${respuesta.status}).`)
       }
 
+      setModalConfirmacion(false)
       setFinalizado(true)
     } catch (error) {
       setError(
@@ -285,7 +322,7 @@ export default function RegistrarAlumno({ alVolver }: Props) {
           ? error.message
           : 'Ocurrió un error al registrar el alumno.',
       )
-    }
+    } finally { setGuardandoAlumno(false) }
   }
   const campo = (
     titulo: string,
@@ -452,8 +489,8 @@ export default function RegistrarAlumno({ alVolver }: Props) {
               <input
                 type="date"
                 required
-                min="1900-01-01"
-                max={new Date().toLocaleDateString('sv-SE')}
+                min={fechaLimiteEdad(18)}
+                max={fechaLimiteEdad(3)}
                 value={datos.fechaNacimiento}
                 onChange={(e) => actualizar('fechaNacimiento', e.target.value)}
               />
@@ -527,77 +564,121 @@ export default function RegistrarAlumno({ alVolver }: Props) {
 
         {paso === 2 && (
           <div>
-            <p>Selecciona un tutor registrado o crea uno nuevo.</p>
-            <label className="registro-campo">
-              <span>Buscar tutor existente</span>
-              <input type="search" placeholder="Nombre, apellido o CURP"
-                value={busquedaTutor}
-                onChange={(e) => setBusquedaTutor(e.target.value)} />
-            </label>
-            <div style={{ maxHeight: 210, overflowY: 'auto', marginTop: 12 }}>
-              {tutores.filter((t) =>
-                [t.nombre, t.apellidoPaterno, t.apellidoMaterno ?? '', t.curp]
-                  .join(' ').toLowerCase()
-                  .includes(busquedaTutor.trim().toLowerCase())
-              ).map((t) => (
-                <label key={t.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: 10, cursor: 'pointer'
-                }}>
-                  <input type="radio" name="tutorSeleccionado"
-                    checked={tutorId === t.id}
-                    onChange={() => seleccionarTutor(t)} />
-                  <span>{t.nombre} {t.apellidoPaterno} {t.apellidoMaterno ?? ''}
-                    {' - '}{t.parentesco} / {t.telefono}</span>
-                </label>
-              ))}
+            <p>Elige cómo deseas asignar un tutor al alumno.</p>
+
+            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <label>
+                <input
+                  type="radio"
+                  name="modoTutor"
+                  checked={!creandoTutor}
+                  onChange={() => cambiarModoTutor('existente')}
+                />
+                {' '}Seleccionar tutor existente
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  name="modoTutor"
+                  checked={creandoTutor}
+                  onChange={() => cambiarModoTutor('nuevo')}
+                />
+                {' '}Registrar tutor nuevo
+              </label>
             </div>
-            {tutorId !== null && (
-              <p><strong>Tutor seleccionado:</strong> {datos.tutorNombre}</p>
-            )}
-            <button type="button" className="registro-secundario"
-              onClick={() => { setCreandoTutor((actual) => !actual); setError('') }}>
-              {creandoTutor ? 'Cancelar nuevo tutor' : '+ Registrar tutor nuevo'}
-            </button>
-            {creandoTutor && (
+
+            {!creandoTutor ? (
+              <>
+                <label className="registro-campo">
+                  <span>Buscar tutor existente</span>
+                  <input
+                    type="search"
+                    placeholder="Nombre, apellido o CURP"
+                    value={busquedaTutor}
+                    onChange={(e) => setBusquedaTutor(e.target.value)}
+                  />
+                </label>
+                <div className="kgm-tutor-lista" role="radiogroup" aria-label="Tutores disponibles">
+                  {tutores.filter((t) =>
+                    [t.nombre, t.apellidoPaterno, t.apellidoMaterno ?? '', t.curp]
+                      .join(' ').toLowerCase().includes(busquedaTutor.trim().toLowerCase())
+                  ).length === 0 && <p className="kgm-tutor-vacio">No se encontraron tutores.</p>}
+                  {tutores.filter((t) =>
+                    [t.nombre, t.apellidoPaterno, t.apellidoMaterno ?? '', t.curp]
+                      .join(' ').toLowerCase().includes(busquedaTutor.trim().toLowerCase())
+                  ).map((t) => (
+                    <label key={t.id} className={`kgm-tutor-tarjeta ${tutorId === t.id ? 'kgm-tutor-tarjeta--activa' : ''}`}>
+                      <input type="radio" name="tutorSeleccionado" checked={tutorId === t.id}
+                        onChange={() => seleccionarTutor(t)} />
+                      <span className="kgm-tutor-avatar" aria-hidden="true">{t.nombre.charAt(0)}{t.apellidoPaterno.charAt(0)}</span>
+                      <span className="kgm-tutor-info">
+                        <strong>{t.nombre} {t.apellidoPaterno} {t.apellidoMaterno ?? ''}</strong>
+                        <small>{t.parentesco} · {t.telefono}</small>
+                      </span>
+                      <span className="kgm-tutor-indicador" aria-hidden="true">{tutorId === t.id ? '✓' : ''}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {tutorId !== null && (
+                  <p>
+                    <strong>Tutor seleccionado:</strong> {datos.tutorNombre}
+                  </p>
+                )}
+              </>
+            ) : (
               <div className="registro-grid" style={{ marginTop: 16 }}>
                 {([
                   ['nombre', 'Nombre(s)'],
                   ['apellidoPaterno', 'Apellido paterno'],
                   ['apellidoMaterno', 'Apellido materno'],
                   ['curp', 'CURP'],
-                  ['telefono', 'Telefono'],
-                  ['email', 'Correo electronico'],
-                  ['direccion', 'Direccion'],
+                  ['telefono', 'Teléfono'],
+                  ['email', 'Correo electrónico'],
+                  ['direccion', 'Dirección'],
                 ] as const).map(([clave, etiqueta]) => (
                   <label className="registro-campo" key={clave}>
                     <span>{etiqueta}</span>
-                    <input value={nuevoTutor[clave]}
+                    <input
+                      value={nuevoTutor[clave]}
                       onChange={(e) => setNuevoTutor((actual) => ({
                         ...actual, [clave]: e.target.value
-                      }))} />
+                      }))}
+                    />
                   </label>
                 ))}
+
                 <label className="registro-campo">
                   <span>Parentesco *</span>
-                  <select value={nuevoTutor.parentesco}
+                  <select
+                    value={nuevoTutor.parentesco}
                     onChange={(e) => setNuevoTutor((actual) => ({
                       ...actual, parentesco: e.target.value
-                    }))}>
+                    }))}
+                  >
                     <option value="">Seleccionar</option>
-                    <option>Madre</option><option>Padre</option>
-                    <option>Tutor legal</option><option>Otro</option>
+                    <option>Madre</option>
+                    <option>Padre</option>
+                    <option>Tutor legal</option>
+                    <option>Otro</option>
                   </select>
                 </label>
-                <button type="button" className="boton-primario-alumnos"
-                  disabled={guardandoTutor} onClick={registrarTutorNuevo}>
-                  {guardandoTutor ? 'Guardando...' : 'Guardar y seleccionar tutor'}
+
+                <button
+                  type="button"
+                  className="boton-primario-alumnos"
+                  disabled={guardandoTutor}
+                  onClick={registrarTutorNuevo}
+                >
+                  {guardandoTutor
+                    ? 'Guardando...'
+                    : 'Guardar y seleccionar tutor'}
                 </button>
               </div>
             )}
           </div>
         )}
-
         {paso === 3 && (
           <div>
             <p>
@@ -672,11 +753,28 @@ export default function RegistrarAlumno({ alVolver }: Props) {
             {paso === 0 ? 'Cancelar' : 'Anterior'}
           </button>
 
-          <button type="submit" className="boton-primario-alumnos">
-            {paso === 4 ? 'Confirmar registro' : 'Siguiente'}
+          <button type="submit" className="boton-primario-alumnos" disabled={guardandoAlumno}>
+            {guardandoAlumno ? 'Guardando...' : paso === 4 ? 'Confirmar registro' : 'Siguiente'}
           </button>
         </footer>
       </form>
+      {modalConfirmacion && !finalizado && (
+        <div className="kgm-modal-fondo" onMouseDown={(e) => { if (e.target === e.currentTarget && !guardandoAlumno) setModalConfirmacion(false) }}>
+          <div className="kgm-modal" role="dialog" aria-modal="true" aria-labelledby="kgm-modal-titulo">
+            <div className="kgm-modal-icono" aria-hidden="true">✓</div>
+            <h3 id="kgm-modal-titulo">¿Confirmar registro del alumno?</h3>
+            <p>Se registrará a <strong>{datos.nombre} {datos.apellidoPaterno} {datos.apellidoMaterno}</strong> en el sistema KGM.</p>
+            <p className="kgm-modal-detalle">{datos.grado} {datos.grupo} · {datos.turno} · Tutor: {datos.tutorNombre}</p>
+            <div className="kgm-modal-acciones">
+              <button type="button" className="registro-secundario" disabled={guardandoAlumno} onClick={() => setModalConfirmacion(false)}>Cancelar</button>
+              <button type="button" className="boton-primario-alumnos" disabled={guardandoAlumno}
+                onClick={() => { void enviar({ preventDefault: () => {} } as FormEvent<HTMLFormElement>) }}>
+                {guardandoAlumno ? 'Guardando...' : 'Sí, confirmar registro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
