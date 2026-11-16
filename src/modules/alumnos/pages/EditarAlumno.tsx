@@ -15,6 +15,9 @@ interface EditarAlumnoProps {
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const nombrePattern = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]*$/
+const telefonoPattern = /^\d{10}$/
+
 
 function editableFrom(alumno: Alumno): AlumnoEditable {
   return {
@@ -32,13 +35,71 @@ function editableFrom(alumno: Alumno): AlumnoEditable {
     observaciones: alumno.observaciones,
   }
 }
+function fechaActualLocal(): string {
+  const hoy = new Date()
+  const year = hoy.getFullYear()
+  const month = String(hoy.getMonth() + 1).padStart(2, '0')
+  const day = String(hoy.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function validate(alumno: Alumno): FormErrors {
   const errors: FormErrors = {}
+  const hoy = fechaActualLocal()
 
-  if (!alumno.nombres.trim()) errors.nombres = 'El nombre es obligatorio.'
-  if (!alumno.apellidoPaterno.trim()) errors.apellidoPaterno = 'El apellido paterno es obligatorio.'
-  if (alumno.correo && !emailPattern.test(alumno.correo)) errors.correo = 'Ingresa un correo válido.'
+  if (!alumno.nombres.trim()) {
+    errors.nombres = 'El nombre es obligatorio.'
+  } else if (!nombrePattern.test(alumno.nombres.trim())) {
+    errors.nombres = 'El nombre solo puede contener letras, espacios, guiones y apóstrofes.'
+  }
+
+  if (!alumno.apellidoPaterno.trim()) {
+    errors.apellidoPaterno = 'El apellido paterno es obligatorio.'
+  } else if (!nombrePattern.test(alumno.apellidoPaterno.trim())) {
+    errors.apellidoPaterno = 'El apellido paterno contiene caracteres no válidos.'
+  }
+
+  if (alumno.apellidoMaterno.trim() && !nombrePattern.test(alumno.apellidoMaterno.trim())) {
+    errors.apellidoMaterno = 'El apellido materno contiene caracteres no válidos.'
+  }
+
+  if (!alumno.fechaNacimiento) {
+    errors.fechaNacimiento = 'La fecha de nacimiento es obligatoria.'
+  } else if (alumno.fechaNacimiento >= hoy) {
+    errors.fechaNacimiento = 'La fecha de nacimiento debe ser anterior a hoy.'
+  }
+
+  if (!alumno.nacionalidad.trim()) {
+    errors.nacionalidad = 'La nacionalidad es obligatoria.'
+  } else if (!nombrePattern.test(alumno.nacionalidad.trim())) {
+    errors.nacionalidad = 'La nacionalidad contiene caracteres no válidos.'
+  }
+
+  if (alumno.telefono && !telefonoPattern.test(alumno.telefono.replace(/\s/g, ''))) {
+    errors.telefono = 'El teléfono debe contener 10 dígitos.'
+  }
+
+  if (alumno.correo && !emailPattern.test(alumno.correo.trim())) {
+    errors.correo = 'Ingresa un correo válido.'
+  }
+
+  if (!alumno.turno) {
+    errors.turno = 'Selecciona un turno.'
+  } else if (!['Matutino', 'Vespertino'].includes(alumno.turno)) {
+    errors.turno = 'Selecciona un turno válido.'
+  }
+
+  if (alumno.fechaIngreso) {
+    if (alumno.fechaIngreso > hoy) {
+      errors.fechaIngreso = 'La fecha de ingreso no puede ser futura.'
+    } else if (alumno.fechaNacimiento && alumno.fechaIngreso < alumno.fechaNacimiento) {
+      errors.fechaIngreso = 'La fecha de ingreso no puede ser anterior al nacimiento.'
+    }
+  }
+
+  if (alumno.observaciones.length > 500) {
+    errors.observaciones = 'Las observaciones no pueden exceder 500 caracteres.'
+  }
 
   return errors
 }
@@ -80,6 +141,13 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
     event.preventDefault()
     if (!alumno) return
 
+    if (!original || JSON.stringify(editableFrom(alumno)) === JSON.stringify(editableFrom(original))) {
+      setErrors({})
+      setFeedbackKind('info')
+      setMessage('No hay cambios por guardar.')
+      return
+    }
+
     const nextErrors = validate(alumno)
     setErrors(nextErrors)
     setMessage(null)
@@ -88,6 +156,11 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
       setMessage('Revisa los campos marcados antes de guardar.')
       return
     }
+
+    const confirmado = window.confirm(
+      `¿Deseas guardar los cambios de ${fullName}?`,
+    )
+    if (!confirmado) return
 
     try {
       setSaving(true)
@@ -122,14 +195,6 @@ export default function EditarAlumno({ alumnoId = 1, onAbrirRegistroTutor }: Edi
           <h1>Editar alumno</h1>
           <p>{fullName} · CURP {alumno.curp}</p>
         </div>
-        <button
-          className="button button--primary button--top"
-          type="button"
-          onClick={() => (document.getElementById('editar-alumno-form') as HTMLFormElement | null)?.requestSubmit()}
-          disabled={saving}
-        >
-          {saving ? 'Guardando…' : 'Guardar cambios'}
-        </button>
         {onAbrirRegistroTutor && (
           <button
             className="button button--secondary button--top"

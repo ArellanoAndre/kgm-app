@@ -2,27 +2,38 @@ import { useState } from 'react'
 import DashboardLayout from './components/layout/DashboardLayout'
 import type {
   ModuloId,
+  OpcionAlumnosId,
   OpcionGestionAcademicaId,
 } from './components/layout/modulosBarraLateral'
 import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
 import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
-import ConsultarAlumnos from './modules/alumnos/pages/ConsultarAlumnos'
+import ConsultarAlumnos, { type ModoPaginaAlumnos } from './modules/alumnos/pages/ConsultarAlumnos'
 import RegistrarAlumno from './modules/alumnos/pages/RegistrarAlumno'
 import ConsultarDocentes from './modules/docentes/pages/ConsultarDocentes'
 import AsignarAlumnoGrupo from './modules/gestion-academica/pages/AsignarAlumnoGrupo'
 import { GestionCiclosEscolares } from './modules/gestion-academica/pages/GestionCiclosEscolares'
 import { GestionMaterias } from './modules/gestion-academica/pages/GestionMaterias'
+import { GestionAsignacionesAcademicas } from './modules/gestion-academica/pages/GestionAsignacionesAcademicas'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import ControlAcceso from './modules/usuarios/pages/ControlAcceso'
 import './App.css'
 
 type VistaReportes = 'inicio' | 'calificaciones'
-type VistaAlumnos = 'consulta' | 'registro'
+
+function modoPaginaAlumnos(opcion: OpcionAlumnosId | null): ModoPaginaAlumnos {
+  if (opcion === 'editar-alumno') return 'editar'
+  if (opcion === 'registrar-tutor') return 'tutor'
+  if (opcion === 'expediente-digital') return 'expediente'
+  return 'consulta'
+}
 
 export function App() {
   const [moduloActivo, setModuloActivo] =
     useState<ModuloId>('gestion-academica')
+
+  const [opcionAlumnos, setOpcionAlumnos] =
+    useState<OpcionAlumnosId | null>(null)
 
   const [opcionGestionAcademica, setOpcionGestionAcademica] =
     useState<OpcionGestionAcademicaId | null>(null)
@@ -33,12 +44,10 @@ export function App() {
   const [registrandoTutor, setRegistrandoTutor] = useState(false)
   const [alumnoTutorId, setAlumnoTutorId] = useState<number | null>(null)
   const [mostrandoExpediente, setMostrandoExpediente] = useState(false)
-  const [vistaAlumnos, setVistaAlumnos] =
-    useState<VistaAlumnos>('consulta')
 
   function cambiarModulo(modulo: ModuloId) {
     setModuloActivo(modulo)
-    setVistaAlumnos('consulta')
+    setOpcionAlumnos(null)
     setOpcionGestionAcademica(null)
     setRegistrandoTutor(false)
     setAlumnoTutorId(null)
@@ -49,15 +58,24 @@ export function App() {
     }
   }
 
+  function cambiarOpcionAlumnos(opcion: OpcionAlumnosId) {
+    setOpcionAlumnos(opcion)
+    setRegistrandoTutor(false)
+    setAlumnoTutorId(null)
+    setMostrandoExpediente(false)
+  }
+
   return (
     <DashboardLayout
       alCambiarBusqueda={setBusqueda}
       alCambiarModulo={cambiarModulo}
+      alCambiarOpcionAlumnos={cambiarOpcionAlumnos}
       alCambiarOpcionGestionAcademica={setOpcionGestionAcademica}
       inicialesUsuario="JU"
       moduloActivo={moduloActivo}
       nombreUsuario="Juan Pérez"
       notificacionesPendientes={3}
+      opcionAlumnosActiva={opcionAlumnos}
       opcionGestionAcademicaActiva={opcionGestionAcademica}
       valorBusqueda={busqueda}
     >
@@ -70,14 +88,23 @@ export function App() {
         />
       ) : moduloActivo === 'alumnos' ? (
         mostrandoExpediente ? (
-          <ExpedienteDigital alumnoId={alumnoTutorId ?? 1} onVolver={() => setMostrandoExpediente(false)} />
+          <ExpedienteDigital
+            alumnoId={alumnoTutorId ?? 1}
+            onVolver={() => setMostrandoExpediente(false)}
+          />
         ) : registrandoTutor && alumnoTutorId !== null ? (
-          <RegistrarTutor alumnoId={alumnoTutorId} onCancel={() => setRegistrandoTutor(false)} />
-        ) : vistaAlumnos === 'registro' ? (
-          <RegistrarAlumno alVolver={() => setVistaAlumnos('consulta')} />
+          <RegistrarTutor
+            alumnoId={alumnoTutorId}
+            onCancel={() => setRegistrandoTutor(false)}
+          />
+        ) : opcionAlumnos === 'registrar-alumno' ? (
+          <RegistrarAlumno
+            alVolver={() => setOpcionAlumnos('consultar-alumnos')}
+          />
         ) : (
           <ConsultarAlumnos
-            alNuevoAlumno={() => setVistaAlumnos('registro')}
+            modo={modoPaginaAlumnos(opcionAlumnos)}
+            alNuevoAlumno={() => setOpcionAlumnos('registrar-alumno')}
             alRegistrarTutor={(alumno) => {
               setAlumnoTutorId(alumno.id)
               setRegistrandoTutor(true)
@@ -88,7 +115,6 @@ export function App() {
             }}
           />
         )
-        
       ) : moduloActivo === 'reportes' &&
         vistaReportes === 'calificaciones' ? (
         <ReporteCalificaciones
@@ -109,6 +135,9 @@ export function App() {
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica === 'materias' ? (
         <GestionMaterias />
+      ) : moduloActivo === 'gestion-academica' &&
+        opcionGestionAcademica === 'asignar-docente-grupo-materia' ? (
+        <GestionAsignacionesAcademicas />
       ) : moduloActivo === 'gestion-academica' &&
         opcionGestionAcademica ? (
         <section

@@ -168,37 +168,37 @@
     display: none;
   }
 
-  .barra-lateral--gestion-abierta {
+  .barra-lateral--submenu-abierto {
     flex-basis: 220px;
     align-items: stretch;
     padding: 16px 14px;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__marca {
+  .barra-lateral--submenu-abierto .barra-lateral__marca {
     padding: 0 4px;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__nombre-marca,
-  .barra-lateral--gestion-abierta .barra-lateral__etiqueta-seccion,
-  .barra-lateral--gestion-abierta .barra-lateral__modulo span,
-  .barra-lateral--gestion-abierta .barra-lateral__flecha,
-  .barra-lateral--gestion-abierta .barra-lateral__lista-opciones {
+  .barra-lateral--submenu-abierto .barra-lateral__nombre-marca,
+  .barra-lateral--submenu-abierto .barra-lateral__etiqueta-seccion,
+  .barra-lateral--submenu-abierto .barra-lateral__modulo span,
+  .barra-lateral--submenu-abierto .barra-lateral__flecha,
+  .barra-lateral--submenu-abierto .barra-lateral__lista-opciones {
     display: block;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__nombre-marca {
+  .barra-lateral--submenu-abierto .barra-lateral__nombre-marca {
     display: inline;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__etiqueta-seccion {
+  .barra-lateral--submenu-abierto .barra-lateral__etiqueta-seccion {
     display: block;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__navegacion {
+  .barra-lateral--submenu-abierto .barra-lateral__navegacion {
     width: 100%;
   }
 
-  .barra-lateral--gestion-abierta .barra-lateral__modulo {
+  .barra-lateral--submenu-abierto .barra-lateral__modulo {
     justify-content: flex-start;
     padding: 0 10px;
   }

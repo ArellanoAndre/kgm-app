@@ -8,6 +8,16 @@ export const MODULOS_BARRA_LATERAL = [
 
 export type ModuloId = (typeof MODULOS_BARRA_LATERAL)[number]['id']
 
+export const OPCIONES_ALUMNOS = [
+  { id: 'consultar-alumnos', nombre: 'Consultar alumnos' },
+  { id: 'registrar-alumno', nombre: 'Registrar alumno' },
+  { id: 'editar-alumno', nombre: 'Editar alumno' },
+  { id: 'registrar-tutor', nombre: 'Registrar tutor' },
+  { id: 'expediente-digital', nombre: 'Expediente digital' },
+] as const
+
+export type OpcionAlumnosId = (typeof OPCIONES_ALUMNOS)[number]['id']
+
 export const OPCIONES_GESTION_ACADEMICA = [
   { id: 'ciclos-escolares', nombre: 'Ciclos escolares' },
   { id: 'grados-grupos', nombre: 'Grados y grupos' },
