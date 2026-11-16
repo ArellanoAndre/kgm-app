@@ -16,6 +16,7 @@ import { GestionMaterias } from './modules/gestion-academica/pages/GestionMateri
 import { GestionAsignacionesAcademicas } from './modules/gestion-academica/pages/GestionAsignacionesAcademicas'
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
+import ControlAcceso from './modules/usuarios/pages/ControlAcceso'
 import './App.css'
 
 type VistaReportes = 'inicio' | 'calificaciones'
@@ -78,7 +79,9 @@ export function App() {
       opcionGestionAcademicaActiva={opcionGestionAcademica}
       valorBusqueda={busqueda}
     >
-      {moduloActivo === 'docentes' ? (
+      {moduloActivo === 'usuarios' ? (
+        <ControlAcceso />
+      ) : moduloActivo === 'docentes' ? (
         <ConsultarDocentes
           alLimpiarBusquedaGlobal={() => setBusqueda('')}
           busquedaGlobal={busqueda}
