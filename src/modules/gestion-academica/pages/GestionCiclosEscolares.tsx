@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { ChevronRight, ChevronLeft, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import '../styles/gestionCicloEscolar.css'
 import type { CicloEscolar, CrearCicloPayload } from '../types/CicloEscolar'
 import { ciclosEscolaresServicio } from '../services/ciclosEscolaresServicio'
@@ -7,13 +7,16 @@ import { ciclosEscolaresServicio } from '../services/ciclosEscolaresServicio'
 import { CiclosTabla } from '../components/CiclosTabla'
 import { CiclosFiltros } from '../components/CiclosFiltros'
 import { FormularioNuevoCiclo } from '../components/FormularioNuevoCiclo'
+import { ModalConfirmacionCrear } from '../components/ModalConfirmacionCrear'
+import { ModalConfirmacionActivar } from '../components/ModalConfirmacionActivar'
 
 export const GestionCiclosEscolares: React.FC = () => {
   const [ciclos, setCiclos] = useState<CicloEscolar[]>([])
   const [cargando, setCargando] = useState(true)
+  const [procesandoAccion, setProcesandoAccion] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Estados de control para Paginación y Filtros
+  // Paginación y Filtros
   const [pagina, setPagina] = useState(1)
   const [meta, setMeta] = useState({
     total: 0,
@@ -26,126 +29,113 @@ export const GestionCiclosEscolares: React.FC = () => {
   const [estadoFilter, setEstadoFilter] = useState('Todos')
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
 
-  // Cargar lista paginada desde la API
+  // Estados para Modales de Confirmación
+  const [datosCrearTemp, setDatosCrearTemp] = useState<CrearCicloPayload | null>(null)
+  const [cicloAActivarTemp, setCicloAActivarTemp] = useState<CicloEscolar | null>(null)
+
   const cargarCiclos = async () => {
     try {
       setCargando(true)
       setError(null)
-      const respuesta = await ciclosEscolaresServicio.listarPaginado(
-        pagina,
-        10,
-        estadoFilter,
-      )
-      // 🛡️ Aseguramos que si respuesta.datos viene indefinido, guardemos un arreglo vacío []
-      setCiclos(respuesta?.datos ?? [])
-      if (respuesta?.meta) {
-        setMeta({
-          total: respuesta.meta.total,
-          totalPaginas: respuesta.meta.totalPaginas,
-          tienePaginaSiguiente: respuesta.meta.tienePaginaSiguiente,
-          tienePaginaAnterior: respuesta.meta.tienePaginaAnterior,
-        })
-      }
+      const respuesta = await ciclosEscolaresServicio.listarPaginado(pagina, 10, estadoFilter)
+      setCiclos(respuesta.datos)
+      setMeta({
+        total: respuesta.meta.total,
+        totalPaginas: respuesta.meta.totalPaginas,
+        tienePaginaSiguiente: respuesta.meta.tienePaginaSiguiente,
+        tienePaginaAnterior: respuesta.meta.tienePaginaAnterior,
+      })
     } catch (err: unknown) {
-      setCiclos([]) // Fallback defensivo
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Error al consultar los ciclos escolares desde el servidor.',
-      )
+      setError(err instanceof Error ? err.message : 'Error al consultar los ciclos escolares desde el servidor.')
     } finally {
       setCargando(false)
     }
   }
 
-  // 2. En la memoización, agregamos el guardián anti-undefined:
-  const ciclosFiltrados = useMemo(() => {
-    if (!Array.isArray(ciclos)) return []
-    return ciclos.filter((ciclo) =>
-      ciclo.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-  }, [ciclos, searchTerm])
-
-  // Recargar al cambiar página o filtro de estado
   useEffect(() => {
     cargarCiclos()
   }, [pagina, estadoFilter])
 
-  // Cambiar filtro de estado reiniciando a la página 1
+  const ciclosFiltrados = useMemo(() => {
+    return ciclos.filter((ciclo) => ciclo.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+  }, [ciclos, searchTerm])
+
   const handleEstadoFilterChange = (nuevoEstado: string) => {
     setEstadoFilter(nuevoEstado)
     setPagina(1)
   }
 
-  // Registrar nuevo ciclo vía POST
-  const handleCrearCiclo = async (nuevoCicloData: CrearCicloPayload) => {
+  // 1. Paso 1 al Crear: Interceptar y solicitar confirmación
+  const SolicitarConfirmacionCrear = (nuevoCicloData: CrearCicloPayload) => {
+    setDatosCrearTemp(nuevoCicloData)
+  }
+
+  // 2. Paso 2 al Crear: Ejecutar POST tras confirmar
+  const ejecutarCreacionCiclo = async () => {
+    if (!datosCrearTemp) return
     try {
+      setProcesandoAccion(true)
       setError(null)
       await ciclosEscolaresServicio.crear({
-        nombre: nuevoCicloData.nombre,
-        fechaInicio: nuevoCicloData.fechaInicio,
-        fechaFin: nuevoCicloData.fechaFin,
+        nombre: datosCrearTemp.nombre,
+        fechaInicio: datosCrearTemp.fechaInicio,
+        fechaFin: datosCrearTemp.fechaFin,
       })
+      setDatosCrearTemp(null)
       setMostrarFormulario(false)
       setPagina(1)
       await cargarCiclos()
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Ocurrió un error al intentar registrar el nuevo ciclo escolar.',
-      )
+      setError(err instanceof Error ? err.message : 'Ocurrió un error al intentar registrar el nuevo ciclo escolar.')
+    } finally {
+      setProcesandoAccion(false)
     }
   }
 
-  // Activar ciclo vía PATCH
-  const handleActivarCiclo = async (cicloId: number) => {
+  // 1. Paso 1 al Activar: Interceptar desde la tabla y abrir modal
+  const SolicitarConfirmacionActivar = (cicloId: number) => {
+    const cicloEncontrado = ciclos.find((c) => c.id === cicloId)
+    if (cicloEncontrado) {
+      setCicloAActivarTemp(cicloEncontrado)
+    }
+  }
+
+  // 2. Paso 2 al Activar: Ejecutar PATCH tras confirmar
+  const ejecutarActivacionCiclo = async () => {
+    if (!cicloAActivarTemp) return
     try {
+      setProcesandoAccion(true)
       setError(null)
-      await ciclosEscolaresServicio.cambiarEstado(cicloId, 'Activo')
+      await ciclosEscolaresServicio.cambiarEstado(cicloAActivarTemp.id, 'Activo')
+      setCicloAActivarTemp(null)
       await cargarCiclos()
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'No se pudo cambiar el estado del ciclo escolar.',
-      )
+      setError(err instanceof Error ? err.message : 'No se pudo cambiar el estado del ciclo escolar.')
+    } finally {
+      setProcesandoAccion(false)
     }
   }
 
   return (
     <div className="academico-container">
-      {/* Mensaje de Error */}
       {error && (
-        <div
-          className="materias-mensaje materias-mensaje--error"
-          role="alert"
-          style={{ marginBottom: '16px' }}
-        >
+        <div className="materias-mensaje materias-mensaje--error" role="alert" style={{ marginBottom: '16px' }}>
           <strong>Error en el servicio: </strong>
           <span>{error}</span>
         </div>
       )}
 
-      {/* Encabezado Principal */}
       <div className="academico-header">
         <div>
           <h1 className="academico-title">Ciclos escolares</h1>
-          <p className="academico-subtitle">
-            Consulta y administración de ciclos escolares
-          </p>
+          <p className="academico-subtitle">Consulta y administración de ciclos escolares</p>
         </div>
-        <button
-          className="btn-primary"
-          onClick={() => setMostrarFormulario(true)}
-          type="button"
-        >
+        <button className="btn-primary" onClick={() => setMostrarFormulario(true)} type="button">
           <Plus size={16} />
           Nuevo ciclo
         </button>
       </div>
 
-      {/* Tabla con Filtros y Paginación */}
       <div className="card-table">
         <CiclosFiltros
           estadoFilter={estadoFilter}
@@ -155,27 +145,17 @@ export const GestionCiclosEscolares: React.FC = () => {
         />
 
         {cargando ? (
-          <div className="materias-estado" style={{ padding: '40px 0' }}>
-            <p>Cargando ciclos escolares...</p>
-          </div>
+          <p style={{ padding: '24px', textAlign: 'center' }}>Cargando ciclos escolares...</p>
         ) : (
           <>
-            <CiclosTabla
-              ciclos={ciclosFiltrados}
-              onActivarCiclo={handleActivarCiclo}
-            />
+            <CiclosTabla ciclos={ciclosFiltrados} onActivarCiclo={SolicitarConfirmacionActivar} />
 
-            {/* Pie de Tabla: Paginación Elegante */}
+            {/* Pie de Tabla con Paginación */}
             <div className="paginacion-contenedor">
               <div className="paginacion-info">
-                <span>
-                  Página <strong>{pagina}</strong> de <strong>{meta.totalPaginas}</strong>
-                </span>
-                <span className="paginacion-badge">
-                  {meta.total} {meta.total === 1 ? 'registro' : 'registros'}
-                </span>
+                <span>Página <strong>{pagina}</strong> de <strong>{meta.totalPaginas}</strong></span>
+                <span className="paginacion-badge">{meta.total} registros</span>
               </div>
-
               <div className="paginacion-acciones">
                 <button
                   className="btn-secundario btn-paginacion"
@@ -183,10 +163,8 @@ export const GestionCiclosEscolares: React.FC = () => {
                   onClick={() => setPagina((p) => Math.max(p - 1, 1))}
                   type="button"
                 >
-                  <ChevronLeft size={16} />
                   Anterior
                 </button>
-
                 <button
                   className="btn-secundario btn-paginacion"
                   disabled={!meta.tienePaginaSiguiente || cargando}
@@ -194,7 +172,6 @@ export const GestionCiclosEscolares: React.FC = () => {
                   type="button"
                 >
                   Siguiente
-                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -202,13 +179,31 @@ export const GestionCiclosEscolares: React.FC = () => {
         )}
       </div>
 
-      {/* Formulario Modal / Card */}
       {mostrarFormulario && (
         <FormularioNuevoCiclo
           alCancelar={() => setMostrarFormulario(false)}
-          onCrearCiclo={handleCrearCiclo}
+          onCrearCiclo={SolicitarConfirmacionCrear}
         />
       )}
+
+      {/* Modales de Confirmación */}
+      <ModalConfirmacionCrear
+        abierto={!!datosCrearTemp}
+        nombre={datosCrearTemp?.nombre || ''}
+        fechaInicio={datosCrearTemp?.fechaInicio || ''}
+        fechaFin={datosCrearTemp?.fechaFin || ''}
+        onCancelar={() => setDatosCrearTemp(null)}
+        onConfirmar={ejecutarCreacionCiclo}
+        cargando={procesandoAccion}
+      />
+
+      <ModalConfirmacionActivar
+        abierto={!!cicloAActivarTemp}
+        ciclo={cicloAActivarTemp}
+        onCancelar={() => setCicloAActivarTemp(null)}
+        onConfirmar={ejecutarActivacionCiclo}
+        cargando={procesandoAccion}
+      />
     </div>
   )
 }
