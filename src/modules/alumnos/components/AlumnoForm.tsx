@@ -19,6 +19,14 @@ interface AlumnoFormProps {
 const inputValue = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
   event.target.value
 
+const fechaActualLocal = () => {
+  const hoy = new Date()
+  const year = hoy.getFullYear()
+  const month = String(hoy.getMonth() + 1).padStart(2, '0')
+  const day = String(hoy.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function AlumnoForm({
   alumno,
   errors,
@@ -59,7 +67,12 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Apellido materno</span>
-              <input value={alumno.apellidoMaterno} onChange={(e) => update('apellidoMaterno', inputValue(e))} />
+              <input
+                value={alumno.apellidoMaterno}
+                onChange={(e) => update('apellidoMaterno', inputValue(e))}
+                aria-invalid={Boolean(errors.apellidoMaterno)}
+              />
+              {errors.apellidoMaterno && <small className="field-error">{errors.apellidoMaterno}</small>}
             </label>
             <label>
               <span>CURP</span>
@@ -67,7 +80,14 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Fecha de nacimiento</span>
-              <input type="date" value={alumno.fechaNacimiento} onChange={(e) => update('fechaNacimiento', inputValue(e))} />
+              <input
+                type="date"
+                value={alumno.fechaNacimiento}
+                max={fechaActualLocal()}
+                onChange={(e) => update('fechaNacimiento', inputValue(e))}
+                aria-invalid={Boolean(errors.fechaNacimiento)}
+              />
+              {errors.fechaNacimiento && <small className="field-error">{errors.fechaNacimiento}</small>}
             </label>
             <label>
               <span>Género</span>
@@ -80,11 +100,23 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Nacionalidad</span>
-              <input value={alumno.nacionalidad} onChange={(e) => update('nacionalidad', inputValue(e))} />
+              <input
+                value={alumno.nacionalidad}
+                onChange={(e) => update('nacionalidad', inputValue(e))}
+                aria-invalid={Boolean(errors.nacionalidad)}
+              />
+              {errors.nacionalidad && <small className="field-error">{errors.nacionalidad}</small>}
             </label>
             <label>
               <span>Teléfono</span>
-              <input value={alumno.telefono} onChange={(e) => update('telefono', inputValue(e))} />
+              <input
+                value={alumno.telefono}
+                inputMode="numeric"
+                maxLength={10}
+                onChange={(e) => update('telefono', inputValue(e).replace(/\D/g, ''))}
+                aria-invalid={Boolean(errors.telefono)}
+              />
+              {errors.telefono && <small className="field-error">{errors.telefono}</small>}
             </label>
             <label>
               <span>Correo electrónico</span>
@@ -124,16 +156,28 @@ export function AlumnoForm({
             </label>
             <label>
               <span>Turno</span>
-              <select value={alumno.turno} onChange={(e) => update('turno', inputValue(e))}>
-                <option value="">Sin definir</option>
+              <select
+                value={alumno.turno}
+                onChange={(e) => update('turno', inputValue(e))}
+                aria-invalid={Boolean(errors.turno)}
+              >
+                <option value="">Seleccionar turno</option>
                 <option>Matutino</option>
                 <option>Vespertino</option>
-                <option>Nocturno</option>
               </select>
+              {errors.turno && <small className="field-error">{errors.turno}</small>}
             </label>
             <label>
               <span>Fecha de ingreso</span>
-              <input type="date" value={alumno.fechaIngreso} onChange={(e) => update('fechaIngreso', inputValue(e))} />
+              <input
+                type="date"
+                value={alumno.fechaIngreso}
+                min={alumno.fechaNacimiento || undefined}
+                max={fechaActualLocal()}
+                onChange={(e) => update('fechaIngreso', inputValue(e))}
+                aria-invalid={Boolean(errors.fechaIngreso)}
+              />
+              {errors.fechaIngreso && <small className="field-error">{errors.fechaIngreso}</small>}
             </label>
             <label>
               <span>Tutor principal</span>
@@ -145,7 +189,14 @@ export function AlumnoForm({
             </label>
             <label className="form-span-4">
               <span>Observaciones</span>
-              <textarea rows={2} value={alumno.observaciones} onChange={(e) => update('observaciones', inputValue(e))} />
+              <textarea
+                rows={2}
+                maxLength={500}
+                value={alumno.observaciones}
+                onChange={(e) => update('observaciones', inputValue(e))}
+                aria-invalid={Boolean(errors.observaciones)}
+              />
+              {errors.observaciones && <small className="field-error">{errors.observaciones}</small>}
             </label>
           </div>
         </section>

@@ -1,16 +1,24 @@
+// src/modules/gestion-academica/components/CiclosTabla.tsx
+
 import React from 'react';
 import type { CicloEscolar } from '../types/CicloEscolar';
 
 interface Props {
   ciclos: CicloEscolar[];
+  onActivarCiclo?: (cicloId: number) => Promise<void> | void;
 }
 
-export const CiclosTabla: React.FC<Props> = ({ ciclos }) => {
+export const CiclosTabla: React.FC<Props> = ({ ciclos, onActivarCiclo }) => {
   const getBadgeClass = (estado: CicloEscolar['estado']) => {
     switch (estado) {
-      case 'Activo': return 'badge badge-activo';
-      case 'Cerrado': return 'badge badge-cerrado';
-      case 'Programado': return 'badge badge-programado';
+      case 'Activo':
+        return 'badge badge-activo';
+      case 'Cerrado':
+        return 'badge badge-cerrado';
+      case 'Programado':
+        return 'badge badge-programado';
+      default:
+        return 'badge';
     }
   };
 
@@ -28,16 +36,28 @@ export const CiclosTabla: React.FC<Props> = ({ ciclos }) => {
       <tbody>
         {ciclos.map((ciclo) => (
           <tr key={ciclo.id}>
-            <td><div className="ciclo-nombre">{ciclo.nombre}</div></td>
-            <td>{ciclo.fechaInicio}</td>
-            <td>{ciclo.fechaFin}</td>
+            <td>
+              <div className="ciclo-nombre">{ciclo.nombre}</div>
+            </td>
+            <td>{new Date(ciclo.fechaInicio).toLocaleDateString()}</td>
+            <td>{new Date(ciclo.fechaFin).toLocaleDateString()}</td>
             <td>
               <span className={getBadgeClass(ciclo.estado)}>{ciclo.estado}</span>
             </td>
             <td style={{ textAlign: 'right' }}>
-              <button className="action-link">Ver</button>
-              <button className="action-link">Editar</button>
-              <button className="action-link">Más opciones</button>
+              {/* 🛡️ Solo permitimos activar si el ciclo está en estado "Programado" */}
+              {ciclo.estado === 'Programado' && onActivarCiclo && (
+                <button
+                  className="action-link"
+                  onClick={() => onActivarCiclo(ciclo.id)}
+                  type="button"
+                >
+                  Activar
+                </button>
+              )}
+              <button className="action-link" type="button">
+                Ver
+              </button>
             </td>
           </tr>
         ))}

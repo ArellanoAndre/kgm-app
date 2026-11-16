@@ -2,7 +2,7 @@ import EditarAlumno from './EditarAlumno'
 import FichaAlumno from './FichaAlumno'
 import { useEffect, useMemo, useState } from 'react'
 import FiltrosAlumnos, { type FiltrosAlumno } from '../components/FiltrosAlumnos'
-import TablaAlumnos from '../components/TablaAlumnos'
+import TablaAlumnos, { type ModoAccionAlumnos } from '../components/TablaAlumnos'
 import { consultarAlumnos, consultarFichaAlumno } from '../services/consultaAlumnosApi'
 import type { AlumnoConsulta as Alumno } from '../types/AlumnoConsulta'
 import '../styles/alumnos.css'
@@ -14,13 +14,47 @@ const FILTROS_INICIALES: FiltrosAlumno = {
   estado: 'Todos',
 }
 
+export type ModoPaginaAlumnos = 'consulta' | 'editar' | 'tutor' | 'expediente'
+
 interface ConsultarAlumnosProps {
   alNuevoAlumno?: () => void
   alRegistrarTutor?: (alumno: Alumno) => void
   alAbrirExpediente?: (alumno: Alumno) => void
+  modo?: ModoPaginaAlumnos
 }
 
-export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAbrirExpediente }: ConsultarAlumnosProps) {
+const CONFIGURACION_MODO: Record<
+  ModoPaginaAlumnos,
+  { titulo: string; descripcion: string; accion: ModoAccionAlumnos }
+> = {
+  consulta: {
+    titulo: 'Alumnos',
+    descripcion: 'Consulta, búsqueda y administración de alumnos registrados',
+    accion: 'completo',
+  },
+  editar: {
+    titulo: 'Editar alumno',
+    descripcion: 'Busca y selecciona el alumno cuya información deseas editar',
+    accion: 'editar',
+  },
+  tutor: {
+    titulo: 'Registrar tutor',
+    descripcion: 'Busca y selecciona el alumno al que deseas registrar un tutor',
+    accion: 'tutor',
+  },
+  expediente: {
+    titulo: 'Expediente digital',
+    descripcion: 'Busca y selecciona el alumno cuyo expediente deseas consultar o gestionar',
+    accion: 'expediente',
+  },
+}
+
+export default function ConsultarAlumnos({
+  alNuevoAlumno,
+  alRegistrarTutor,
+  alAbrirExpediente,
+  modo = 'consulta',
+}: ConsultarAlumnosProps) {
   const [alumnos, setAlumnos] = useState<Alumno[]>([])
   const [filtros, setFiltros] = useState(FILTROS_INICIALES)
   const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_INICIALES)
@@ -44,6 +78,12 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
     }
   }, [])
 
+  useEffect(() => {
+    setAlumnoSeleccionado(null)
+    setAlumnoEnEdicion(null)
+    setMensaje('')
+  }, [modo])
+
   async function verFicha(alumno: Alumno) {
     try {
       const ficha = await consultarFichaAlumno(alumno)
@@ -56,6 +96,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
       )
     }
   }
+
   const grados = useMemo(
     () => [...new Set(alumnos.map((alumno) => alumno.grado).filter(Boolean))],
     [alumnos],
@@ -76,7 +117,7 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
         alumno.apellidoMaterno,
       ].join(' ').toLowerCase()
 
-  return (
+      return (
         (!busqueda ||
           nombre.includes(busqueda) ||
           alumno.curp.toLowerCase().includes(busqueda)) &&
@@ -91,10 +132,9 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
   }, [alumnos, filtrosAplicados])
 
   function cambiarEstado(_alumno: Alumno) {
-    setMensaje(
-      'El cambio de estado todavía no está conectado al backend.',
-    )
+    setMensaje('El cambio de estado todavía no está conectado al backend.')
   }
+
   if (alumnoEnEdicion) {
     return (
       <section className="pagina-alumnos">
@@ -103,13 +143,14 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
           className="boton-primario-alumnos"
           onClick={() => setAlumnoEnEdicion(null)}
         >
-          ← Volver al listado
+          Volver al listado
         </button>
 
         <EditarAlumno alumnoId={alumnoEnEdicion.id} />
       </section>
     )
   }
+
   if (alumnoSeleccionado) {
     return (
       <FichaAlumno
@@ -119,21 +160,25 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
     )
   }
 
+  const configuracion = CONFIGURACION_MODO[modo]
+
   return (
     <section className="pagina-alumnos">
       <header className="pagina-alumnos__encabezado">
         <div>
-          <h1>Alumnos</h1>
-          <p>Consulta y administración de alumnos registrados</p>
+          <h1>{configuracion.titulo}</h1>
+          <p>{configuracion.descripcion}</p>
         </div>
 
-        <button
-          className="boton-primario-alumnos"
-          type="button"
-          onClick={() => alNuevoAlumno?.()}
-        >
-          + Nuevo alumno
-        </button>
+        {modo === 'consulta' && (
+          <button
+            className="boton-primario-alumnos"
+            type="button"
+            onClick={() => alNuevoAlumno?.()}
+          >
+            + Nuevo alumno
+          </button>
+        )}
       </header>
 
       <FiltrosAlumnos
@@ -150,14 +195,16 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
           alVer={verFicha}
           alEditar={setAlumnoEnEdicion}
           alCambiarEstado={cambiarEstado}
-            alRegistrarTutor={(alumno) => alRegistrarTutor?.(alumno)}
-            alAbrirExpediente={(alumno) => alAbrirExpediente?.(alumno)}
+          alRegistrarTutor={(alumno) => alRegistrarTutor?.(alumno)}
+          alAbrirExpediente={(alumno) => alAbrirExpediente?.(alumno)}
+          modoAccion={configuracion.accion}
         />
       </section>
 
       <aside className="aviso-alumnos">
-        Antes de registrar un alumno, verifica que su CURP no exista
-        previamente en el catálogo.
+        {modo === 'consulta'
+          ? 'La búsqueda y los filtros corresponden a HU-1.3 y permiten localizar alumnos por nombre, CURP, grado, grupo y estado.'
+          : 'Utiliza los filtros para localizar al alumno y después selecciona la acción disponible en la tabla.'}
       </aside>
 
       {mensaje && (
@@ -168,8 +215,6 @@ export default function ConsultarAlumnos({ alNuevoAlumno, alRegistrarTutor, alAb
           </button>
         </div>
       )}
-
-
     </section>
   )
 }
