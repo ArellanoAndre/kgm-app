@@ -76,7 +76,7 @@ export const FormularioNuevoCiclo: React.FC<Props> = ({ onCrearCiclo, alCancelar
         <div style={{ marginTop: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button type="submit" className="btn-primary">Crear ciclo</button>
           {alCancelar && (
-            <button type="button" onClick={alCancelar} className="btn-secondary">
+            <button type="button" onClick={alCancelar} className="btn-paginacion">
               Cancelar
             </button>
           )}
