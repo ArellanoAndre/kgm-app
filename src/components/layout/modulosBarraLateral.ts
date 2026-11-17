@@ -31,3 +31,11 @@ export const OPCIONES_GESTION_ACADEMICA = [
 
 export type OpcionGestionAcademicaId =
   (typeof OPCIONES_GESTION_ACADEMICA)[number]['id']
+
+export const OPCIONES_USUARIOS = [
+  { id: 'control-acceso', nombre: 'Control de acceso' },
+  { id: 'crear-usuario', nombre: 'Creación de usuarios' },
+  { id: 'gestion-roles', nombre: 'Asignación y gestión de roles' },
+] as const
+
+export type OpcionUsuariosId = (typeof OPCIONES_USUARIOS)[number]['id']

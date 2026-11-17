@@ -3,9 +3,11 @@ import {
   MODULOS_BARRA_LATERAL,
   OPCIONES_ALUMNOS,
   OPCIONES_GESTION_ACADEMICA,
+  OPCIONES_USUARIOS,
   type ModuloId,
   type OpcionAlumnosId,
   type OpcionGestionAcademicaId,
+  type OpcionUsuariosId,
 } from './modulosBarraLateral'
 import './BarraLateral.css'
 
@@ -16,6 +18,8 @@ type PropiedadesBarraLateral = {
   alCambiarOpcionAlumnos: (opcion: OpcionAlumnosId) => void
   opcionGestionAcademicaActiva: OpcionGestionAcademicaId | null
   alCambiarOpcionGestionAcademica: (opcion: OpcionGestionAcademicaId) => void
+  opcionUsuariosActiva: OpcionUsuariosId | null
+  alCambiarOpcionUsuarios: (opcion: OpcionUsuariosId) => void
 }
 
 function IconoModulo({ nombre }: { nombre: (typeof MODULOS_BARRA_LATERAL)[number]['icono'] }) {
@@ -86,6 +90,8 @@ function BarraLateral({
   alCambiarOpcionAlumnos,
   opcionGestionAcademicaActiva,
   alCambiarOpcionGestionAcademica,
+  opcionUsuariosActiva,
+  alCambiarOpcionUsuarios,
 }: PropiedadesBarraLateral) {
   const [alumnosAbierto, setAlumnosAbierto] = useState(
     moduloActivo === 'alumnos' || opcionAlumnosActiva !== null,
@@ -93,8 +99,12 @@ function BarraLateral({
   const [gestionAcademicaAbierta, setGestionAcademicaAbierta] = useState(
     moduloActivo === 'gestion-academica' || opcionGestionAcademicaActiva !== null,
   )
+  const [usuariosAbierto, setUsuariosAbierto] = useState(
+    moduloActivo === 'usuarios' || opcionUsuariosActiva !== null,
+  )
 
-  const haySubmenuAbierto = alumnosAbierto || gestionAcademicaAbierta
+  const haySubmenuAbierto =
+    alumnosAbierto || gestionAcademicaAbierta || usuariosAbierto
 
   return (
     <aside
@@ -121,19 +131,28 @@ function BarraLateral({
           {MODULOS_BARRA_LATERAL.map((modulo) => {
             const esAlumnos = modulo.id === 'alumnos'
             const esGestionAcademica = modulo.id === 'gestion-academica'
-            const tieneSubmenu = esAlumnos || esGestionAcademica
+            const esUsuarios = modulo.id === 'usuarios'
+            const tieneSubmenu = esAlumnos || esGestionAcademica || esUsuarios
             const submenuAbierto = esAlumnos
               ? alumnosAbierto
               : esGestionAcademica
                 ? gestionAcademicaAbierta
-                : false
+                : esUsuarios
+                  ? usuariosAbierto
+                  : false
+            const opcionActiva = esAlumnos
+              ? opcionAlumnosActiva
+              : esGestionAcademica
+                ? opcionGestionAcademicaActiva
+                : esUsuarios
+                  ? opcionUsuariosActiva
+                  : null
 
             return (
               <li key={modulo.id}>
                 <button
                   aria-current={
-                    moduloActivo === modulo.id &&
-                    !(esAlumnos ? opcionAlumnosActiva : opcionGestionAcademicaActiva)
+                    moduloActivo === modulo.id && opcionActiva === null
                       ? 'page'
                       : undefined
                   }
@@ -144,6 +163,7 @@ function BarraLateral({
                       alCambiarModulo('alumnos')
                       setAlumnosAbierto((abierta) => !abierta)
                       setGestionAcademicaAbierta(false)
+                      setUsuariosAbierto(false)
                       return
                     }
 
@@ -151,11 +171,21 @@ function BarraLateral({
                       alCambiarModulo('gestion-academica')
                       setGestionAcademicaAbierta((abierta) => !abierta)
                       setAlumnosAbierto(false)
+                      setUsuariosAbierto(false)
+                      return
+                    }
+
+                    if (esUsuarios) {
+                      alCambiarModulo('usuarios')
+                      setUsuariosAbierto((abierta) => !abierta)
+                      setAlumnosAbierto(false)
+                      setGestionAcademicaAbierta(false)
                       return
                     }
 
                     setAlumnosAbierto(false)
                     setGestionAcademicaAbierta(false)
+                    setUsuariosAbierto(false)
                     alCambiarModulo(modulo.id)
                   }}
                   title={modulo.nombre}
@@ -217,6 +247,31 @@ function BarraLateral({
                     ))}
                   </ul>
                 )}
+
+                  {esUsuarios && usuariosAbierto && (
+                    <ul
+                      aria-label="Opciones de Usuarios"
+                      className="barra-lateral__lista-opciones"
+                    >
+                      {OPCIONES_USUARIOS.map((opcion) => (
+                        <li key={opcion.id}>
+                          <button
+                            aria-current={
+                              opcionUsuariosActiva === opcion.id ? 'page' : undefined
+                            }
+                            className={`barra-lateral__opcion${opcionUsuariosActiva === opcion.id ? ' barra-lateral__opcion--activa' : ''}`}
+                            onClick={() => {
+                              alCambiarModulo('usuarios')
+                              alCambiarOpcionUsuarios(opcion.id)
+                            }}
+                            type="button"
+                          >
+                            {opcion.nombre}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
               </li>
             )
           })}
