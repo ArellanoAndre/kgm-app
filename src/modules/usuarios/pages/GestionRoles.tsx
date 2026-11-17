@@ -2,9 +2,9 @@ import '../styles/usuariosRegistro.css'
 
 const ROLES = [
   {
-    nombre: 'Administrador escolar',
-    descripcion: 'Gestiona la configuración y los accesos de la escuela.',
-    inicial: 'A',
+    nombre: 'Tutor',
+    descripcion: 'Consulta la información vinculada a sus alumnos.',
+    inicial: 'T',
   },
   {
     nombre: 'Docente',
@@ -12,9 +12,9 @@ const ROLES = [
     inicial: 'D',
   },
   {
-    nombre: 'Tutor',
-    descripcion: 'Consulta la información vinculada a sus alumnos.',
-    inicial: 'T',
+    nombre: 'Administrador escolar',
+    descripcion: 'Gestiona la configuración y los accesos de la escuela.',
+    inicial: 'A',
   },
 ]
 

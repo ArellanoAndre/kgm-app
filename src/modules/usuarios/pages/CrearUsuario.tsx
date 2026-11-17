@@ -1,11 +1,17 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
-import { obtenerDocentes } from '../../docentes/services/docenteServicio'
-import type { Docente } from '../../docentes/types/Docente'
-import { consultarTutores } from '../../alumnos/services/tutorService'
-import type { Tutor } from '../../alumnos/types/Tutor'
+import {
+  cerrarSesionUsuario,
+  crearUsuario as enviarCrearUsuario,
+  iniciarSesionUsuario,
+  obtenerPerfilesDisponibles,
+  obtenerSesionUsuario,
+  UsuarioApiError,
+  type PerfilDisponible,
+  type SesionUsuario,
+} from '../services/usuariosServicio'
 import '../styles/usuariosRegistro.css'
 
-type RolUsuario = 'docente' | 'tutor' | 'administrador'
+type RolFormulario = 'docente' | 'tutor' | 'administrador'
 type EstadoCarga = 'inactivo' | 'cargando' | 'listo' | 'error'
 
 type DatosAdministrador = {
@@ -24,7 +30,7 @@ const ADMINISTRADOR_VACIO: DatosAdministrador = {
   foto: null,
 }
 
-const ROLES: { id: RolUsuario; nombre: string; descripcion: string }[] = [
+const ROLES: { id: RolFormulario; nombre: string; descripcion: string }[] = [
   {
     id: 'docente',
     nombre: 'Docente',
@@ -42,12 +48,6 @@ const ROLES: { id: RolUsuario; nombre: string; descripcion: string }[] = [
   },
 ]
 
-function nombreCompletoTutor(tutor: Tutor): string {
-  return [tutor.nombre, tutor.apellidoPaterno, tutor.apellidoMaterno]
-    .filter(Boolean)
-    .join(' ')
-}
-
 function iniciales(nombre: string): string {
   return nombre
     .split(/\s+/)
@@ -59,16 +59,24 @@ function iniciales(nombre: string): string {
 }
 
 export default function CrearUsuario() {
-  const [rol, setRol] = useState<RolUsuario | null>(null)
-  const [docentes, setDocentes] = useState<Docente[]>([])
-  const [tutores, setTutores] = useState<Tutor[]>([])
+  const [sesion, setSesion] = useState<SesionUsuario | null>(
+    obtenerSesionUsuario(),
+  )
+  const [rol, setRol] = useState<RolFormulario | null>(null)
+  const [perfiles, setPerfiles] = useState<PerfilDisponible[]>([])
   const [estadoCarga, setEstadoCarga] = useState<EstadoCarga>('inactivo')
   const [errorCarga, setErrorCarga] = useState('')
   const [perfilId, setPerfilId] = useState('')
   const [contrasenaPerfil, setContrasenaPerfil] = useState('')
+  const [correoLogin, setCorreoLogin] = useState('')
+  const [contrasenaLogin, setContrasenaLogin] = useState('')
+  const [errorLogin, setErrorLogin] = useState('')
+  const [iniciandoSesion, setIniciandoSesion] = useState(false)
   const [datosAdministrador, setDatosAdministrador] =
     useState<DatosAdministrador>(ADMINISTRADOR_VACIO)
   const [mensaje, setMensaje] = useState('')
+  const [registroExitoso, setRegistroExitoso] = useState(false)
+  const [guardando, setGuardando] = useState(false)
   const [errorFoto, setErrorFoto] = useState('')
   const [fotoVista, setFotoVista] = useState('')
 
@@ -79,77 +87,86 @@ export default function CrearUsuario() {
   }, [fotoVista])
 
   useEffect(() => {
-    if (rol !== 'docente' && rol !== 'tutor') {
+    if (!sesion || (rol !== 'docente' && rol !== 'tutor')) {
       return
     }
 
     let vigente = true
-
-    if (rol === 'docente') {
-      obtenerDocentes()
-        .then((resultado) => {
-          if (!vigente) return
-          setDocentes(resultado)
-          setEstadoCarga('listo')
-        })
-        .catch((error: unknown) => {
-          if (!vigente) return
-          setErrorCarga(
-            error instanceof Error
-              ? error.message
-              : 'No fue posible consultar los docentes.',
-          )
-          setEstadoCarga('error')
-        })
-    } else {
-      consultarTutores()
-        .then((resultado) => {
-          if (!vigente) return
-          setTutores(resultado)
-          setEstadoCarga('listo')
-        })
-        .catch((error: unknown) => {
-          if (!vigente) return
-          setErrorCarga(
-            error instanceof Error
-              ? error.message
-              : 'No fue posible consultar los tutores.',
-          )
-          setEstadoCarga('error')
-        })
-    }
+    const rolApi = rol === 'docente' ? 'DOCENTE' : 'TUTOR'
+    obtenerPerfilesDisponibles(rolApi)
+      .then((resultado) => {
+        if (!vigente) return
+        setPerfiles(resultado)
+        setEstadoCarga('listo')
+      })
+      .catch((error: unknown) => {
+        if (!vigente) return
+        if (error instanceof UsuarioApiError && error.status === 401) {
+          cerrarSesionUsuario()
+          setSesion(null)
+          setErrorLogin('La sesión expiró. Inicia sesión de nuevo.')
+        }
+        setErrorCarga(
+          error instanceof Error
+            ? error.message
+            : 'No fue posible consultar los perfiles.',
+        )
+        setEstadoCarga('error')
+      })
 
     return () => {
       vigente = false
     }
-  }, [rol])
+  }, [rol, sesion])
 
-  const docenteSeleccionado =
-    rol === 'docente'
-      ? docentes.find((docente) => String(docente.id) === perfilId)
-      : undefined
-  const tutorSeleccionado =
-    rol === 'tutor'
-      ? tutores.find((tutor) => String(tutor.id) === perfilId)
-      : undefined
-  const personaSeleccionada = docenteSeleccionado ?? tutorSeleccionado
-  const nombrePersona = docenteSeleccionado
-    ? docenteSeleccionado.nombre
-    : tutorSeleccionado
-      ? nombreCompletoTutor(tutorSeleccionado)
-      : ''
-  const correoPersona = docenteSeleccionado
-    ? docenteSeleccionado.correo
-    : tutorSeleccionado?.email ?? ''
-  const perfilFoto = docenteSeleccionado?.foto
+  const personaSeleccionada = perfiles.find(
+    (perfil) => String(perfil.id) === perfilId,
+  )
+  const nombrePersona = personaSeleccionada?.nombreCompleto ?? ''
+  const correoPersona = personaSeleccionada?.correo ?? ''
+  const perfilFoto = personaSeleccionada?.foto ?? null
 
-  function seleccionarRol(nuevoRol: RolUsuario) {
+  async function iniciarSesion(evento: FormEvent<HTMLFormElement>) {
+    evento.preventDefault()
+    setErrorLogin('')
+    setIniciandoSesion(true)
+    try {
+      const usuario = await iniciarSesionUsuario(correoLogin, contrasenaLogin)
+      setSesion(usuario)
+      setContrasenaLogin('')
+    } catch (error: unknown) {
+      setErrorLogin(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible iniciar sesión.',
+      )
+    } finally {
+      setIniciandoSesion(false)
+    }
+  }
+
+  function cerrarSesion() {
+    cerrarSesionUsuario()
+    setSesion(null)
+    setRol(null)
+    setPerfilId('')
+    setPerfiles([])
+    setContrasenaPerfil('')
+    setDatosAdministrador(ADMINISTRADOR_VACIO)
+    setMensaje('')
+    setRegistroExitoso(false)
+    setEstadoCarga('inactivo')
+  }
+
+  function seleccionarRol(nuevoRol: RolFormulario) {
     if (rol === nuevoRol) return
     setRol(nuevoRol)
     setPerfilId('')
     setContrasenaPerfil('')
+    setPerfiles([])
     setDatosAdministrador(ADMINISTRADOR_VACIO)
     setMensaje('')
+    setRegistroExitoso(false)
     setErrorFoto('')
     setFotoVista('')
     setErrorCarga('')
@@ -191,23 +208,22 @@ export default function CrearUsuario() {
     setErrorFoto('')
   }
 
-  function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
+  async function manejarEnvio(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
     setMensaje('')
+    setRegistroExitoso(false)
 
     if (rol === 'docente' || rol === 'tutor') {
       if (!personaSeleccionada) {
         setMensaje('Selecciona un perfil registrado antes de continuar.')
         return
       }
-      if (!correoPersona.trim()) {
-        setMensaje(
-          'El perfil seleccionado no tiene correo. Completa ese dato en su registro antes de habilitarle el acceso.',
-        )
-        return
-      }
       if (!contrasenaPerfil) {
         setMensaje('Escribe la contraseña temporal para continuar.')
+        return
+      }
+      if (contrasenaPerfil.length < 12) {
+        setMensaje('La contraseña inicial debe tener al menos 12 caracteres.')
         return
       }
     }
@@ -221,11 +237,66 @@ export default function CrearUsuario() {
         setMensaje('Escribe una contraseña temporal para continuar.')
         return
       }
+      if (datosAdministrador.contrasena.length < 12) {
+        setMensaje('La contraseña inicial debe tener al menos 12 caracteres.')
+        return
+      }
     }
 
-    setMensaje(
-      'La pantalla está lista, pero el acceso no se guardó: la API todavía no ofrece el servicio de creación de usuarios.',
-    )
+    setGuardando(true)
+    try {
+      const creado =
+        rol === 'administrador'
+          ? await enviarCrearUsuario({
+              rol: 'ADMINISTRADOR',
+              nombre: datosAdministrador.nombre,
+              email: datosAdministrador.correo,
+              telefono: datosAdministrador.telefono,
+              password: datosAdministrador.contrasena,
+              foto: datosAdministrador.foto,
+            })
+          : await enviarCrearUsuario({
+              rol: rol === 'docente' ? 'DOCENTE' : 'TUTOR',
+              perfilId: Number(perfilId),
+              password: contrasenaPerfil,
+            })
+
+      setRegistroExitoso(true)
+      setMensaje(
+        `Usuario ${creado.email} registrado correctamente con rol ${creado.rol.toLocaleLowerCase()}.`,
+      )
+      setPerfilId('')
+      setContrasenaPerfil('')
+      setDatosAdministrador(ADMINISTRADOR_VACIO)
+      setFotoVista('')
+
+      if (rol === 'docente' || rol === 'tutor') {
+        try {
+          const perfilesActualizados = await obtenerPerfilesDisponibles(
+            rol === 'docente' ? 'DOCENTE' : 'TUTOR',
+          )
+          setPerfiles(perfilesActualizados)
+        } catch {
+          setEstadoCarga('error')
+          setErrorCarga(
+            'El usuario se registró, pero no se pudo actualizar la lista. Recarga las opciones para continuar.',
+          )
+        }
+      }
+    } catch (error: unknown) {
+      if (error instanceof UsuarioApiError && error.status === 401) {
+        cerrarSesion()
+        setErrorLogin('La sesión expiró. Inicia sesión de nuevo.')
+        return
+      }
+      setMensaje(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible registrar el usuario.',
+      )
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -240,318 +311,388 @@ export default function CrearUsuario() {
         </div>
       </header>
 
-      <section aria-labelledby="crear-usuario-rol" className="usuario-panel">
-        <div className="usuario-panel__titulo">
-          <div>
-            <h2 id="crear-usuario-rol">1. Selecciona el tipo de usuario</h2>
-            <p>El rol determina qué perfil se vinculará con el nuevo acceso.</p>
-          </div>
-        </div>
-
-        <div className="usuario-roles">
-          {ROLES.map((opcion) => (
-            <button
-              aria-pressed={rol === opcion.id}
-              className={`usuario-rol${rol === opcion.id ? ' usuario-rol--activo' : ''}`}
-              key={opcion.id}
-              onClick={() => seleccionarRol(opcion.id)}
-              type="button"
-            >
-              <span aria-hidden="true" className="usuario-rol__icono">
-                {opcion.id === 'docente' ? 'D' : opcion.id === 'tutor' ? 'T' : 'A'}
-              </span>
-              <span>
-                <strong>{opcion.nombre}</strong>
-                <small>{opcion.descripcion}</small>
-              </span>
-              <span aria-hidden="true" className="usuario-rol__radio" />
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {rol && (
-        <form className="usuario-panel usuario-formulario" onSubmit={manejarEnvio}>
-          <div className="usuario-panel__titulo">
-            <div>
-              <h2>2. Datos del usuario</h2>
+      <>
+        {!sesion && (
+          <form
+            className="usuario-panel usuario-login"
+            onSubmit={iniciarSesion}
+          >
+            <div className="usuario-panel__titulo">
+              <div>
+                <h2>Inicia sesión como administrador escolar</h2>
+                <p>
+                  Solo una cuenta de administrador puede consultar perfiles o
+                  crear usuarios.
+                </p>
+              </div>
+            </div>
+            <div className="usuario-login__rejilla">
+              <label className="usuario-campo">
+                <span>Correo institucional</span>
+                <input
+                  autoComplete="username"
+                  onChange={(evento) => setCorreoLogin(evento.target.value)}
+                  required
+                  type="email"
+                  value={correoLogin}
+                />
+              </label>
+              <label className="usuario-campo">
+                <span>Contraseña</span>
+                <input
+                  autoComplete="current-password"
+                  onChange={(evento) => setContrasenaLogin(evento.target.value)}
+                  required
+                  type="password"
+                  value={contrasenaLogin}
+                />
+              </label>
+            </div>
+            {errorLogin && (
+              <p className="usuario-mensaje usuario-mensaje--error" role="alert">
+                {errorLogin}
+              </p>
+            )}
+            <footer className="usuario-formulario__acciones">
+              <button
+                className="usuario-boton usuario-boton--primario"
+                disabled={iniciandoSesion}
+                type="submit"
+              >
+                {iniciandoSesion ? 'Validando…' : 'Iniciar sesión'}
+              </button>
+            </footer>
+            <div className="usuario-aviso" role="note">
+              <strong>¿Es el primer administrador?</strong>
               <p>
-                {rol === 'administrador'
-                  ? 'Captura el perfil que se asociará al acceso de administrador escolar.'
-                  : 'Selecciona el perfil existente. Sus datos personales se muestran en modo de solo lectura.'}
+                El administrador inicial se aprovisiona una sola vez desde un
+                entorno confiable con el secreto de bootstrap del servidor.
+                Nunca introduzcas ese secreto en esta pantalla ni lo incluyas
+                en el frontend.
               </p>
             </div>
-            <span className="usuario-etiqueta-rol">
-              {ROLES.find((opcion) => opcion.id === rol)?.nombre}
-            </span>
-          </div>
+          </form>
+        )}
 
-          {(rol === 'docente' || rol === 'tutor') && (
-            <>
-              <label className="usuario-campo usuario-campo--completo" htmlFor="usuario-perfil">
-                <span>Perfil registrado <strong aria-hidden="true">*</strong></span>
-                <select
-                  id="usuario-perfil"
-                  onChange={(evento) => {
-                    setPerfilId(evento.target.value)
-                    setContrasenaPerfil('')
-                    setMensaje('')
-                  }}
-                  required
-                  value={perfilId}
-                >
-                  <option value="">
-                    {estadoCarga === 'cargando'
-                      ? 'Cargando registros…'
-                      : `Selecciona un ${rol}`}
-                  </option>
-                  {rol === 'docente'
-                    ? docentes.map((docente) => (
-                        <option key={docente.id} value={docente.id}>
-                          {docente.nombre} · {docente.correo || 'Sin correo'}
-                        </option>
-                      ))
-                    : tutores.map((tutor) => (
-                        <option key={tutor.id} value={tutor.id}>
-                          {nombreCompletoTutor(tutor)} · {tutor.email || 'Sin correo'}
-                        </option>
-                      ))}
-                </select>
-                {estadoCarga === 'error' && (
-                  <small className="usuario-campo__error" role="alert">
-                    {errorCarga}
-                  </small>
-                )}
-                {estadoCarga === 'listo' && !personaSeleccionada && (
-                  <small className="usuario-campo__ayuda">
-                    {rol === 'docente' ? docentes.length : tutores.length} perfiles disponibles.
-                  </small>
-                )}
-              </label>
+        {sesion?.rol === 'ADMINISTRADOR' && (
+          <>
+            <div className="usuario-sesion">
+              <div>
+                <strong>Sesión de administrador</strong>
+                <span>{sesion.nombre} · {sesion.email}</span>
+              </div>
+              <button
+                className="usuario-boton usuario-boton--secundario"
+                onClick={cerrarSesion}
+                type="button"
+              >
+                Cerrar sesión
+              </button>
+            </div>
 
-              {personaSeleccionada && (
-                <>
-                  <div className="usuario-perfil">
-                    <div className="usuario-perfil__avatar">
-                      {perfilFoto ? (
-                        <img alt={`Foto de ${nombrePersona}`} src={perfilFoto} />
-                      ) : (
-                        <span>{iniciales(nombrePersona) || (rol === 'tutor' ? 'T' : 'D')}</span>
-                      )}
-                    </div>
-                    <div>
-                      <strong>{nombrePersona}</strong>
-                      <span>
-                        {rol === 'docente'
-                          ? 'Perfil de docente registrado'
-                          : 'Perfil de tutor registrado'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="usuario-rejilla">
-                    <label className="usuario-campo">
-                      <span>Nombre completo</span>
-                      <input readOnly value={nombrePersona} />
-                    </label>
-                    <label className="usuario-campo">
-                      <span>Correo institucional</span>
-                      <input readOnly type="email" value={correoPersona ?? ''} />
-                    </label>
-                    <label className="usuario-campo">
-                      <span>CURP</span>
-                      <input
-                        readOnly
-                        value={
-                          docenteSeleccionado?.curp ??
-                          tutorSeleccionado?.curp ??
-                          'No capturada'
-                        }
-                      />
-                    </label>
-                    <label className="usuario-campo">
-                      <span>Teléfono</span>
-                      <input
-                        readOnly
-                        value={
-                          docenteSeleccionado?.telefono ??
-                          tutorSeleccionado?.telefono ??
-                          'No capturado'
-                        }
-                      />
-                    </label>
-                    {tutorSeleccionado && (
-                      <label className="usuario-campo">
-                        <span>Parentesco</span>
-                        <input readOnly value={tutorSeleccionado.parentesco} />
-                      </label>
-                    )}
-                    {tutorSeleccionado && (
-                      <div className="usuario-foto-pendiente">
-                        <strong>Foto de perfil</strong>
-                        <span>
-                          El registro actual de tutor no incluye una foto. Se deberá agregar
-                          soporte en el backend para asociarla al acceso.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </>
-          )}
-
-          {rol === 'administrador' && (
-            <>
-              <div className="usuario-foto-admin">
-                <div className="usuario-foto-admin__vista">
-                  {fotoVista ? (
-                    <img alt="Vista previa de la foto de perfil" src={fotoVista} />
-                  ) : (
-                    <span>{iniciales(datosAdministrador.nombre) || 'A'}</span>
-                  )}
-                </div>
+            <section aria-labelledby="crear-usuario-rol" className="usuario-panel">
+              <div className="usuario-panel__titulo">
                 <div>
-                  <strong>Foto de perfil</strong>
-                  <p>
-                    Vista previa local; la foto no se almacena hasta conectar el backend.
-                  </p>
-                  <label className="usuario-boton usuario-boton--secundario" htmlFor="usuario-foto">
-                    Seleccionar imagen
-                  </label>
-                  <input
-                    accept="image/jpeg,image/png,image/webp"
-                    className="visualmente-oculto"
-                    id="usuario-foto"
-                    onChange={manejarFoto}
-                    type="file"
-                  />
-                  {errorFoto && (
+                  <h2 id="crear-usuario-rol">1. Selecciona el tipo de usuario</h2>
+                  <p>El rol determina qué perfil se vinculará con el nuevo acceso.</p>
+                </div>
+              </div>
+
+              <div className="usuario-roles">
+                {ROLES.map((opcion) => (
+                  <button
+                    aria-pressed={rol === opcion.id}
+                    className={`usuario-rol${rol === opcion.id ? ' usuario-rol--activo' : ''}`}
+                    key={opcion.id}
+                    onClick={() => seleccionarRol(opcion.id)}
+                    type="button"
+                  >
+                    <span aria-hidden="true" className="usuario-rol__icono">
+                      {opcion.id === 'docente' ? 'D' : opcion.id === 'tutor' ? 'T' : 'A'}
+                    </span>
+                    <span>
+                      <strong>{opcion.nombre}</strong>
+                      <small>{opcion.descripcion}</small>
+                    </span>
+                    <span aria-hidden="true" className="usuario-rol__radio" />
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
+        {sesion?.rol === 'ADMINISTRADOR' && rol && (
+          <form className="usuario-panel usuario-formulario" onSubmit={manejarEnvio}>
+            <div className="usuario-panel__titulo">
+              <div>
+                <h2>2. Datos del usuario</h2>
+                <p>
+                  {rol === 'administrador'
+                    ? 'Captura el perfil que se asociará al acceso de administrador escolar.'
+                    : 'Selecciona el perfil existente. Sus datos personales se muestran en modo de solo lectura.'}
+                </p>
+              </div>
+              <span className="usuario-etiqueta-rol">
+                {ROLES.find((opcion) => opcion.id === rol)?.nombre}
+              </span>
+            </div>
+
+            {(rol === 'docente' || rol === 'tutor') && (
+              <>
+                <label className="usuario-campo usuario-campo--completo" htmlFor="usuario-perfil">
+                  <span>Perfil registrado <strong aria-hidden="true">*</strong></span>
+                  <select
+                    disabled={estadoCarga === 'cargando' || estadoCarga === 'error'}
+                    id="usuario-perfil"
+                    onChange={(evento) => {
+                      setPerfilId(evento.target.value)
+                      setContrasenaPerfil('')
+                      setMensaje('')
+                    }}
+                    required
+                    value={perfilId}
+                  >
+                    <option value="">
+                      {estadoCarga === 'cargando'
+                        ? 'Cargando registros…'
+                        : `Selecciona un ${rol}`}
+                    </option>
+                    {perfiles.map((perfil) => (
+                      <option key={perfil.id} value={perfil.id}>
+                        {perfil.nombreCompleto} · {perfil.correo}
+                      </option>
+                    ))}
+                  </select>
+                  {estadoCarga === 'error' && (
                     <small className="usuario-campo__error" role="alert">
-                      {errorFoto}
+                      {errorCarga}
                     </small>
                   )}
+                  {estadoCarga === 'listo' && perfiles.length === 0 && (
+                    <small className="usuario-campo__ayuda">
+                      No hay perfiles activos, con correo y sin cuenta de acceso.
+                    </small>
+                  )}
+                </label>
+
+                {personaSeleccionada && (
+                  <>
+                    <div className="usuario-perfil">
+                      <div className="usuario-perfil__avatar">
+                        {perfilFoto ? (
+                          <img alt={`Foto de ${nombrePersona}`} src={perfilFoto} />
+                        ) : (
+                          <span>{iniciales(nombrePersona) || (rol === 'tutor' ? 'T' : 'D')}</span>
+                        )}
+                      </div>
+                      <div>
+                        <strong>{nombrePersona}</strong>
+                        <span>
+                          {rol === 'docente'
+                            ? 'Perfil de docente registrado'
+                            : 'Perfil de tutor registrado'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="usuario-rejilla">
+                      <label className="usuario-campo">
+                        <span>Nombre completo</span>
+                        <input readOnly value={nombrePersona} />
+                      </label>
+                      <label className="usuario-campo">
+                        <span>Correo institucional</span>
+                        <input readOnly type="email" value={correoPersona} />
+                      </label>
+                      <label className="usuario-campo">
+                        <span>CURP</span>
+                        <input readOnly value={personaSeleccionada.curp ?? 'No capturada'} />
+                      </label>
+                      <label className="usuario-campo">
+                        <span>Teléfono</span>
+                        <input readOnly value={personaSeleccionada.telefono ?? 'No capturado'} />
+                      </label>
+                      {rol === 'tutor' && (
+                        <div className="usuario-foto-pendiente">
+                          <strong>Foto de perfil</strong>
+                          <span>
+                            El modelo actual de tutor no registra una foto; se muestra un avatar inicial.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {rol === 'administrador' && (
+              <>
+                <div className="usuario-foto-admin">
+                  <div className="usuario-foto-admin__vista">
+                    {fotoVista ? (
+                      <img alt="Vista previa de la foto de perfil" src={fotoVista} />
+                    ) : (
+                      <span>{iniciales(datosAdministrador.nombre) || 'A'}</span>
+                    )}
+                  </div>
+                  <div>
+                    <strong>Foto de perfil</strong>
+                    <p>JPG, PNG o WebP; máximo 2 MB. Se guardará en el almacenamiento del servidor.</p>
+                    <label className="usuario-boton usuario-boton--secundario" htmlFor="usuario-foto">
+                      Seleccionar imagen
+                    </label>
+                    <input
+                      accept="image/jpeg,image/png,image/webp"
+                      className="visualmente-oculto"
+                      id="usuario-foto"
+                      onChange={manejarFoto}
+                      type="file"
+                    />
+                    {errorFoto && (
+                      <small className="usuario-campo__error" role="alert">
+                        {errorFoto}
+                      </small>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="usuario-rejilla">
-                <label className="usuario-campo">
-                  <span>Nombre completo <strong aria-hidden="true">*</strong></span>
-                  <input
-                    autoComplete="name"
-                    maxLength={255}
-                    onChange={(evento) =>
-                      setDatosAdministrador((actuales) => ({
-                        ...actuales,
-                        nombre: evento.target.value,
-                      }))
-                    }
-                    placeholder="Nombre y apellidos"
-                    required
-                    value={datosAdministrador.nombre}
-                  />
-                </label>
-                <label className="usuario-campo">
-                  <span>Correo institucional <strong aria-hidden="true">*</strong></span>
-                  <input
-                    autoComplete="email"
-                    maxLength={255}
-                    onChange={(evento) =>
-                      setDatosAdministrador((actuales) => ({
-                        ...actuales,
-                        correo: evento.target.value,
-                      }))
-                    }
-                    placeholder="nombre@escuela.edu.mx"
-                    required
-                    type="email"
-                    value={datosAdministrador.correo}
-                  />
-                </label>
-                <label className="usuario-campo">
-                  <span>Teléfono</span>
-                  <input
-                    autoComplete="tel"
-                    maxLength={50}
-                    onChange={(evento) =>
-                      setDatosAdministrador((actuales) => ({
-                        ...actuales,
-                        telefono: evento.target.value,
-                      }))
-                    }
-                    placeholder="Teléfono de contacto"
-                    type="tel"
-                    value={datosAdministrador.telefono}
-                  />
-                </label>
-                <label className="usuario-campo">
-                  <span>Contraseña temporal <strong aria-hidden="true">*</strong></span>
-                  <input
-                    autoComplete="new-password"
-                    onChange={(evento) =>
-                      setDatosAdministrador((actuales) => ({
-                        ...actuales,
-                        contrasena: evento.target.value,
-                      }))
-                    }
-                    placeholder="Define una contraseña temporal"
-                    required
-                    type="password"
-                    value={datosAdministrador.contrasena}
-                  />
-                </label>
-              </div>
-            </>
-          )}
+                <div className="usuario-rejilla">
+                  <label className="usuario-campo">
+                    <span>Nombre completo <strong aria-hidden="true">*</strong></span>
+                    <input
+                      autoComplete="name"
+                      maxLength={255}
+                      onChange={(evento) =>
+                        setDatosAdministrador((actuales) => ({
+                          ...actuales,
+                          nombre: evento.target.value,
+                        }))
+                      }
+                      placeholder="Nombre y apellidos"
+                      required
+                      value={datosAdministrador.nombre}
+                    />
+                  </label>
+                  <label className="usuario-campo">
+                    <span>Correo institucional <strong aria-hidden="true">*</strong></span>
+                    <input
+                      autoComplete="email"
+                      maxLength={255}
+                      onChange={(evento) =>
+                        setDatosAdministrador((actuales) => ({
+                          ...actuales,
+                          correo: evento.target.value,
+                        }))
+                      }
+                      placeholder="nombre@escuela.edu.mx"
+                      required
+                      type="email"
+                      value={datosAdministrador.correo}
+                    />
+                  </label>
+                  <label className="usuario-campo">
+                    <span>Teléfono</span>
+                    <input
+                      autoComplete="tel"
+                      maxLength={50}
+                      onChange={(evento) =>
+                        setDatosAdministrador((actuales) => ({
+                          ...actuales,
+                          telefono: evento.target.value,
+                        }))
+                      }
+                      placeholder="Teléfono de contacto"
+                      type="tel"
+                      value={datosAdministrador.telefono}
+                    />
+                  </label>
+                  <label className="usuario-campo">
+                    <span>Contraseña inicial <strong aria-hidden="true">*</strong></span>
+                    <input
+                      autoComplete="new-password"
+                      maxLength={128}
+                      minLength={12}
+                      onChange={(evento) =>
+                        setDatosAdministrador((actuales) => ({
+                          ...actuales,
+                          contrasena: evento.target.value,
+                        }))
+                      }
+                      placeholder="Mínimo 12 caracteres"
+                      required
+                      type="password"
+                      value={datosAdministrador.contrasena}
+                    />
+                    <small className="usuario-campo__ayuda">
+                      Comparte esta contraseña inicial por un canal seguro.
+                    </small>
+                  </label>
+                </div>
+              </>
+            )}
 
-          {(docenteSeleccionado || tutorSeleccionado) && (
-            <label className="usuario-campo usuario-campo--contrasena">
-              <span>Contraseña temporal <strong aria-hidden="true">*</strong></span>
-              <input
-                autoComplete="new-password"
-                onChange={(evento) => setContrasenaPerfil(evento.target.value)}
-                placeholder="Define una contraseña temporal"
-                required
-                type="password"
-                value={contrasenaPerfil}
-              />
-              <small>
-                Solo se puede definir la contraseña; los datos del perfil seleccionado no se
-                modifican.
-              </small>
-            </label>
-          )}
+            {(personaSeleccionada || rol === 'administrador') && rol !== 'administrador' && (
+              <label className="usuario-campo usuario-campo--contrasena">
+                <span>Contraseña inicial <strong aria-hidden="true">*</strong></span>
+                <input
+                  autoComplete="new-password"
+                  maxLength={128}
+                  minLength={12}
+                  onChange={(evento) => setContrasenaPerfil(evento.target.value)}
+                  placeholder="Mínimo 12 caracteres"
+                  required
+                  type="password"
+                  value={contrasenaPerfil}
+                />
+                <small>
+                  Comparte la contraseña inicial por un canal seguro. El sistema guarda solo su hash.
+                </small>
+              </label>
+            )}
 
-          <div className="usuario-aviso" role="note">
-            <strong>Validación y guardado pendientes</strong>
-            <p>
-              La API actual no permite crear accesos ni consultar si el correo ya pertenece a un
-              usuario, y tampoco indica qué perfiles ya están vinculados. La comprobación de
-              duplicados, el filtro de perfiles y el guardado se conectarán en la etapa de
-              backend; esta pantalla no persiste datos.
-            </p>
-          </div>
+            <div className="usuario-aviso" role="note">
+              <strong>Acceso restringido y correo único</strong>
+              <p>
+                El servidor valida que la sesión tenga rol Administrador, limita el registro a su escuela
+                y rechaza correos duplicados sin crear el usuario. La contraseña nunca se devuelve en la respuesta.
+              </p>
+            </div>
 
-          {mensaje && (
-            <p className="usuario-mensaje" role="status">
-              {mensaje}
-            </p>
-          )}
+            {mensaje && (
+              <p
+                className={`usuario-mensaje${registroExitoso ? ' usuario-mensaje--exito' : ' usuario-mensaje--error'}`}
+                role={registroExitoso ? 'status' : 'alert'}
+              >
+                {mensaje}
+              </p>
+            )}
 
-          <footer className="usuario-formulario__acciones">
-            <button
-              className="usuario-boton usuario-boton--secundario"
-              onClick={cancelar}
-              type="button"
-            >
-              Cancelar
-            </button>
-            <button className="usuario-boton usuario-boton--primario" type="submit">
-              Guardar usuario
-            </button>
-          </footer>
-        </form>
-      )}
+            <footer className="usuario-formulario__acciones">
+              <button
+                className="usuario-boton usuario-boton--secundario"
+                disabled={guardando}
+                onClick={cancelar}
+                type="button"
+              >
+                Cancelar
+              </button>
+              <button
+                className="usuario-boton usuario-boton--primario"
+                disabled={
+                  guardando ||
+                  (rol !== 'administrador' &&
+                    (estadoCarga !== 'listo' || !personaSeleccionada))
+                }
+                type="submit"
+              >
+                {guardando ? 'Guardando…' : 'Guardar usuario'}
+              </button>
+            </footer>
+          </form>
+        )}
+      </>
     </section>
   )
 }
