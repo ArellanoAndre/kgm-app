@@ -4,6 +4,7 @@ import type {
   ModuloId,
   OpcionAlumnosId,
   OpcionGestionAcademicaId,
+  OpcionUsuariosId,
 } from './components/layout/modulosBarraLateral'
 import ExpedienteDigital from './modules/alumnos/pages/ExpedienteDigital'
 import RegistrarTutor from './modules/alumnos/pages/RegistrarTutor'
@@ -18,6 +19,8 @@ import { GestionAsignacionesAcademicas } from './modules/gestion-academica/pages
 import ReportesInicio from './modules/reportes/pages/ReportesInicio'
 import ReporteCalificaciones from './modules/reportes/pages/ReporteCalificaciones'
 import ControlAcceso from './modules/usuarios/pages/ControlAcceso'
+import CrearUsuario from './modules/usuarios/pages/CrearUsuario'
+import GestionRoles from './modules/usuarios/pages/GestionRoles'
 import './App.css'
 
 type VistaReportes = 'inicio' | 'calificaciones'
@@ -38,6 +41,8 @@ export function App() {
 
   const [opcionGestionAcademica, setOpcionGestionAcademica] =
     useState<OpcionGestionAcademicaId | null>('grados-grupos')
+  const [opcionUsuarios, setOpcionUsuarios] =
+    useState<OpcionUsuariosId | null>(null)
 
   const [busqueda, setBusqueda] = useState('')
   const [vistaReportes, setVistaReportes] =
@@ -50,6 +55,7 @@ export function App() {
     setModuloActivo(modulo)
     setOpcionAlumnos(null)
     setOpcionGestionAcademica(null)
+    setOpcionUsuarios(null)
     setRegistrandoTutor(false)
     setAlumnoTutorId(null)
     setMostrandoExpediente(false)
@@ -72,16 +78,24 @@ export function App() {
       alCambiarModulo={cambiarModulo}
       alCambiarOpcionAlumnos={cambiarOpcionAlumnos}
       alCambiarOpcionGestionAcademica={setOpcionGestionAcademica}
+      alCambiarOpcionUsuarios={setOpcionUsuarios}
       inicialesUsuario="JU"
       moduloActivo={moduloActivo}
       nombreUsuario="Juan Pérez"
       notificacionesPendientes={3}
       opcionAlumnosActiva={opcionAlumnos}
       opcionGestionAcademicaActiva={opcionGestionAcademica}
+      opcionUsuariosActiva={opcionUsuarios}
       valorBusqueda={busqueda}
     >
       {moduloActivo === 'usuarios' ? (
-        <ControlAcceso />
+        opcionUsuarios === 'crear-usuario' ? (
+          <CrearUsuario />
+        ) : opcionUsuarios === 'gestion-roles' ? (
+          <GestionRoles />
+        ) : (
+          <ControlAcceso />
+        )
       ) : moduloActivo === 'docentes' ? (
         <ConsultarDocentes
           alLimpiarBusquedaGlobal={() => setBusqueda('')}
