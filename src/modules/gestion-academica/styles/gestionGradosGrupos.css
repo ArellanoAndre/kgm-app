@@ -1,0 +1,217 @@
+/* Layout Principal */
+.grados-grupos-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+}
+
+/* Panel Izquierdo: Lista de Grados */
+.grados-panel {
+  padding: 16px;
+}
+
+.grados-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.grados-panel__titulo {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: #374151;
+}
+
+.grados-panel__btn-nuevo {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.grados-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.grado-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #374151;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.grado-item--seleccionado {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.grado-item__acciones {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grado-item__badge {
+  font-size: 11px;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.grado-item--seleccionado .grado-item__badge {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.grado-item__btn-editar {
+  padding: 2px 4px;
+  color: #4b5563;
+}
+
+/* Panel Derecho: Tabla de Grupos */
+.grupos-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: #fafafa;
+}
+
+.grupos-header__titulo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.grupos-empty {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.grupos-empty__icono {
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.grupos-ocupacion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grupos-ocupacion__badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.grupos-ocupacion__badge--normal {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+.grupos-ocupacion__badge--lleno {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.docente-sin-asignar {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.margin-bottom-md {
+  margin-bottom: 16px;
+}
+
+/* TextLabels (Etiquetas) */
+.form-group label,
+.card-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  letter-spacing: 0.01em;
+}
+
+/* Inputs de texto, número y fecha */
+.form-control,
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #1f2937;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  outline: none;
+}
+
+/* Placeholder elegante */
+.form-control::placeholder,
+.form-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Estado Focus (Al hacer clic o navegar con Tab) */
+.form-control:focus,
+.form-input:focus,
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background-color: #ffffff;
+}
+
+/* Estilización del Combobox / Select con flecha custom */
+.form-select,
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%206b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* Estilo para las opciones del dropdown */
+.form-select option,
+select.form-control option {
+  padding: 8px;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+/* Estado deshabilitado */
+.form-control:disabled,
+.form-input:disabled,
+.form-select:disabled {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

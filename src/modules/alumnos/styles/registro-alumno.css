@@ -440,3 +440,26 @@
     padding: 24px 16px;
   }
 }
+
+/* KGM: selector de tutores y confirmacion */
+.kgm-tutor-lista { max-height: 310px; overflow-y: auto; display: grid; gap: 9px; padding: 5px 5px 5px 1px; margin-top: 12px; scrollbar-width: thin; }
+.kgm-tutor-tarjeta { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; }
+.kgm-tutor-tarjeta:hover { border-color: #93b4ff; background: #f8fbff; }
+.kgm-tutor-tarjeta--activa { border-color: #2563eb; background: #f0f6ff; box-shadow: 0 0 0 1px rgba(37,99,235,.10); }
+.kgm-tutor-tarjeta input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.kgm-tutor-tarjeta:focus-within { outline: 2px solid #93c5fd; outline-offset: 2px; }
+.kgm-tutor-avatar { flex: 0 0 42px; width: 42px; height: 42px; border-radius: 50%; background: #eaf0ff; color: #2455b8; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.kgm-tutor-info { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.kgm-tutor-info strong { font-size: 14px; color: #172b4d; overflow-wrap: anywhere; }
+.kgm-tutor-info small { font-size: 12px; color: #64748b; }
+.kgm-tutor-indicador { width: 21px; height: 21px; flex: 0 0 21px; border: 2px solid #cbd5e1; border-radius: 50%; display: grid; place-items: center; font-size: 13px; color: white; }
+.kgm-tutor-tarjeta--activa .kgm-tutor-indicador { border-color: #2563eb; background: #2563eb; }
+.kgm-tutor-vacio { padding: 18px; color: #64748b; text-align: center; }
+.kgm-modal-fondo { position: fixed; inset: 0; z-index: 10000; background: rgba(15,23,42,.48); display: flex; justify-content: center; align-items: center; padding: 20px; }
+.kgm-modal { background: #fff; width: min(100%, 460px); border-radius: 18px; padding: 28px; text-align: center; box-shadow: 0 24px 70px rgba(15,23,42,.22); }
+.kgm-modal-icono { margin: 0 auto 16px; width: 52px; height: 52px; border-radius: 50%; background: #eaf2ff; color: #2563eb; font-size: 27px; display: grid; place-items: center; }
+.kgm-modal h3 { font-size: 20px; margin: 0 0 12px; color: #172b4d; }
+.kgm-modal p { font-size: 14px; line-height: 1.55; color: #475569; }
+.kgm-modal-detalle { background: #f8fafc; border-radius: 9px; padding: 10px; }
+.kgm-modal-acciones { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+.kgm-modal-acciones button { flex: 1; min-width: 150px; }

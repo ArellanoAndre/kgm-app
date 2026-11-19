@@ -74,6 +74,7 @@ function AsignarAlumnoGrupo() {
     alumnoSeleccionado?.asignaciones.filter(
       (asignacion) => asignacion.estado === 'Activo',
     ) ?? []
+  const asignacionActiva = asignacionesActuales[0] ?? null
 
   const asignacionRepetida =
     Boolean(cicloEscolar) &&
@@ -110,6 +111,14 @@ function AsignarAlumnoGrupo() {
     if (!cicloEscolar || !grado || !grupo) {
       setTipoMensaje('error')
       setMensaje('Selecciona el ciclo escolar, el grado y el grupo.')
+      return
+    }
+
+    if (asignacionActiva) {
+      setTipoMensaje('error')
+      setMensaje(
+        `El alumno ya tiene una asignación activa en ${asignacionActiva.grado} ${asignacionActiva.grupo} para el ciclo ${asignacionActiva.cicloEscolar}. No puede asignarse a otro grupo mientras esa asignación siga activa.`,
+      )
       return
     }
 
@@ -329,7 +338,17 @@ function AsignarAlumnoGrupo() {
           </label>
         </div>
 
-        {asignacionRepetida ? (
+        {asignacionActiva ? (
+          <div className="aviso-asignacion aviso-asignacion--error" role="alert">
+            <strong>Validación</strong>
+            <span>
+              El alumno {alumnoSeleccionado?.nombre} ya está asignado a{' '}
+              {asignacionActiva.grado} {asignacionActiva.grupo} en el ciclo{' '}
+              {asignacionActiva.cicloEscolar}. Solo puede tener una asignación
+              activa a la vez.
+            </span>
+          </div>
+        ) : asignacionRepetida ? (
           <div className="aviso-asignacion aviso-asignacion--error" role="alert">
             <strong>Validación</strong>
             <span>
@@ -360,7 +379,12 @@ function AsignarAlumnoGrupo() {
         <div className="formulario-asignacion__acciones">
           <button
             className="pagina-asignar-alumno__boton-principal"
-            disabled={cargando || guardando || Boolean(errorCarga)}
+            disabled={
+              cargando ||
+              guardando ||
+              Boolean(errorCarga) ||
+              Boolean(asignacionActiva || asignacionRepetida)
+            }
             type="submit"
           >
             {guardando ? 'Guardando...' : 'Asignar alumno'}

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Filter } from 'lucide-react';
 
 interface Props {
   searchTerm: string;
@@ -33,10 +32,5 @@ export const CiclosFiltros: React.FC<Props> = ({
       <option value="Cerrado">Estado: Cerrado</option>
       <option value="Programado">Estado: Programado</option>
     </select>
-
-    <button className="btn-filter">
-      <Filter size={16} style={{ display: 'inline', marginRight: '6px' }} />
-      Buscar
-    </button>
   </div>
 );
